@@ -6,31 +6,17 @@
 <title>达人看板 - 内部工具</title>
 <style>
 :root {
-  --primary: #4F46E5;
-  --primary-light: #818CF8;
-  --primary-bg: #EEF2FF;
-  --primary-dark: #3730A3;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --info: #3B82F6;
-  --orange: #F97316;
-  --gray-50: #F9FAFB;  --gray-100: #F3F4F6;  --gray-200: #E5E7EB;
-  --gray-300: #D1D5DB;  --gray-400: #9CA3AF;  --gray-500: #6B7280;
-  --gray-600: #4B5563;  --gray-700: #374151;  --gray-800: #1F2937;
-  --gray-900: #111827;
+  --primary: #4F46E5;  --primary-light: #818CF8;  --primary-bg: #EEF2FF;
+  --success: #10B981;  --warning: #F59E0B;  --danger: #EF4444;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;
+  --gray-800:#1F2937;--gray-900:#111827;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
-  background: var(--gray-50); color: var(--gray-800); min-height: 100vh;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;}
 
 /* ===== Header ===== */
-.header {
-  background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
-  color: white; padding: 24px 32px; box-shadow: 0 4px 20px rgba(79,70,229,0.3);
-}
+.header{background:linear-gradient(135deg,var(--primary)0%,#7C3AED 100%);color:white;padding:24px 32px;box-shadow:0 4px 20px rgba(79,70,229,.3);}
 .header h1{font-size:26px;font-weight:700;}
 .header p{font-size:14px;opacity:.85;margin-top:4px;}
 .header-summary{font-size:13px;opacity:.92;margin-top:6px;line-height:1.5;}
@@ -38,30 +24,85 @@ body {
 .stat-item{background:rgba(255,255,255,.15);padding:10px 18px;border-radius:10px;text-align:center;}
 .stat-item .num{font-size:26px;font-weight:700;display:block;line-height:1.2;}
 .stat-item .label{font-size:12px;opacity:.85;margin-top:2px;}
-
 .main{max-width:1440px;margin:0 auto;padding:24px;}
 
-/* ===== 筛选区域 ===== */
-.filter-section{
-  background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);
-  margin-bottom:20px;overflow:hidden;
-}
+/* ===== 多选下拉组件 ===== */
+.filter-section{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px;overflow:hidden;}
 .talent-filters{
-  display:flex;gap:12px;padding:16px 24px;background:#F8FAFC;
-  border-bottom:1px solid var(--gray-100);flex-wrap:wrap;align-items:center;
+  display:flex;gap:10px;padding:16px 24px;background:#F8FAFC;border-bottom:1px solid var(--gray-100);
+  flex-wrap:wrap;align-items:center;
 }
-.filter-group{display:flex;flex-direction:column;gap:4px;min-width:120px;}
+
+.filter-group{display:flex;flex-direction:column;gap:3px;position:relative;min-width:120px;}
 .filter-group label{font-size:11px;color:var(--gray-500);font-weight:500;padding-left:2px;}
-.filter-group select,.filter-group input{
+
+/* 触发器按钮（模拟select） */
+.multi-select-trigger{
+  display:flex;align-items:center;justify-content:space-between;gap:4px;
   border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;
-  font-size:13px;color:var(--gray-700);background:white;outline:none;transition:all .2s;
-  min-width:130px;height:38px;
+  font-size:13px;color:var(--gray-700);background:white;cursor:pointer;
+  min-width:130px;height:38px;transition:all .2s;user-select:none;
 }
-.filter-group select:focus,.filter-group input:focus{
-  border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1);
+.multi-select-trigger:hover{border-color:var(--primary-light);}
+.multi-select-trigger.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
+.trigger-text{overflow:hidden;text-ellipsis;white-space:nowrap;flex:1;font-size:12.5px;color:var(--gray-600);}
+.trigger-text.has-value{color:var(--gray-800);font-weight:500;}
+.trigger-arrow{color:var(--gray-400);font-size:10px;transition:transform .2s;flex-shrink:0;}
+.multi-select-trigger.active .trigger-arrow{transform:rotate(180deg);}
+
+/* 下拉面板 */
+.multi-select-dropdown{
+  position:absolute;top:100%;left:0;z-index:1000;
+  background:white;border:1px solid var(--gray-200);border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:160px;max-width:280px;
+  max-height:260px;overflow-y:auto;display:none;margin-top:4px;
 }
+.multi-select-dropdown.show{display:block;}
+
+/* 搜索框 */
+.dropdown-search{
+  position:sticky;top:0;background:white;z-index:1;padding:8px 10px;
+  border-bottom:1px solid var(--gray-100);
+}
+.dropdown-search input{
+  width:100%;border:1px solid var(--gray-200);border-radius:6px;
+  padding:6px 10px;font-size:12px;outline:none;transition:border-color .2s;
+}
+.dropdown-search input:focus{border-color:var(--primary);}
+
+/* 全选 + 选项列表 */
+.dropdown-option-list{padding:6px 0;}
+.dropdown-opt{
+  display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;
+  transition:background .12s;font-size:13px;color:var(--gray-700);
+}
+.dropdown-opt:hover{background:var(--primary-bg);}
+.dropdown-opt.selected{background:#EDE9FE;color:var(--primary-dark);}
+/* 自定义checkbox */
+.dropdown-cb{
+  width:16px;height:16px;border:2px solid var(--gray-300);border-radius:4px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.dropdown-opt.selected .dropdown-cb{background:var(--primary);border-color:var(--primary);}
+.dropdown-cb svg{width:11px;height:11px;color:white;opacity:0;transition:opacity .15s;}
+.dropdown-opt.selected .dropdown-cb svg{opacity:1;}
+.dropdown-opt-label{line-height:1.3;}
+
+/* 计数角标 */
+.select-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--primary);color:white;font-size:10px;font-weight:700;
+  border-radius:10px;min-width:18px;height:18px;padding:0 5px;margin-left:4px;
+  flex-shrink:0;
+}
+
 .filter-search{flex:1;min-width:200px;max-width:280px;}
-.filter-search input{width:100%;}
+.filter-search input{
+  width:100%;border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;
+  font-size:13px;color:var(--gray-700);background:white;outline:none;height:38px;transition:all .2s;
+}
+.filter-search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
 
 .result-info{font-size:13px;color:var(--gray-500);margin-left:auto;font-weight:500;white-space:nowrap;}
 .btn-reset{
@@ -76,8 +117,7 @@ body {
 .talent-table thead th{
   position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#F8FAFC,var(--gray-50));
   padding:11px 14px;font-size:12px;font-weight:600;color:var(--gray-500);
-  text-align:left;border-bottom:2px solid var(--gray-200);white-space:nowrap;
-  user-select:none;
+  text-align:left;border-bottom:2px solid var(--gray-200);white-space:nowrap;user-select:none;
 }
 .talent-table thead th.sortable{cursor:pointer;transition:color .2s;}
 .talent-table thead th.sortable:hover{color:var(--primary);}
@@ -93,32 +133,24 @@ body {
 .talent-table tbody tr.expanded{background:#EDE9FE;}
 .talent-table tbody tr.expanded:hover{background:#DDD6FE;}
 
-/* 表格内标签 */
 .level-tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;}
 .level-A{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#1a1a2e;}
 .level-B{background:linear-gradient(135deg,#3B82F6,#2563eb);color:white;}
 .level-C{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}
 .level-D{background:linear-gradient(135deg,#94a3b8,#64748b);color:white;}
 .level-E{background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:white;}
+.tag-inline{display:inline-block;padding:1px 8px;background:#EEF2FF;color:#4338CA;border-radius:4px;font-size:11.5px;margin:1px 3px 1px 0;word-break:break-all;}
+.source-tag{display:inline-block;padding:2px 10px;border-radius:4px;font-size:11.5px;font-weight:500;}
 
-.tag-inline{display:inline-block;padding:1px 8px;background:#EEF2FF;color:#4338CA;border-radius:4px;font-size:11.5px;margin:1px 3px 1px 0;white-space:normal;word-break:break-all;}
-
-/* 更多详情按钮 */
 .btn-detail{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:4px 12px;font-size:11.5px;font-weight:600;border-radius:6px;
+  display:inline-flex;align-items:center;gap:4px;padding:4px 12px;font-size:11.5px;font-weight:600;border-radius:6px;
   cursor:pointer;transition:all .2s;white-space:nowrap;
   border:1px solid rgba(79,70,229,.25);background:var(--primary-bg);color:var(--primary);
 }
 .btn-detail:hover{background:#DEDFFE;transform:translateY(-1px);box-shadow:0 3px 8px rgba(79,70,229,.15);}
 .btn-detail.expanded{background:var(--primary);color:white;border-color:var(--primary);}
 
-/* 来源标签 */
-.source-tag{
-  display:inline-block;padding:2px 10px;border-radius:4px;font-size:11.5px;font-weight:500;
-}
-
-/* ===== 详情面板（展开行） ===== */
+/* ===== 详情行 ===== */
 .detail-row{display:none;background:linear-gradient(135deg,#FBFAFE,#F5F3FF);}
 .detail-row.show{display:table-row;}
 .detail-cell{padding:16px 24px!important;vertical-align:top!important;white-space:normal!important;overflow:visible!important;}
@@ -126,64 +158,38 @@ body {
 .detail-field{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px dashed rgba(148,163,184,.2);}
 .detail-label{color:var(--gray-500);font-size:12.5px;white-space:nowrap;flex-shrink:0;margin-right:10px;min-width:90px;}
 .detail-value{color:var(--gray-800);font-size:12.5px;text-align:right;word-break:break-all;font-weight:500;}
-
-/* 详情来源标签（区分sheet） */
-.detail-source-badge{
-  display:inline-block;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600;margin-bottom:10px;
-}
+.detail-source-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600;margin-bottom:10px;}
 .detail-source-history{background:#DBEAFE;color:#1E40AF;}
 .detail-source-camp{background:#D1FAE5;color:#065F46;}
 .detail-source-extra{background:#FEF3C7;color:#92400E;}
-
-.detail-actions{
-  display:flex;align-items:center;justify-content:end;gap:10px;
-  padding:12px 24px 0;border-top:1px solid var(--gray-200);margin-top:8px;
-}
-.btn-copy{
-  padding:7px 16px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;
-  border:1px solid rgba(79,70,229,.25);background:var(--primary-bg);color:var(--primary);
-  transition:all .2s;
-}
+.detail-actions{display:flex;align-items:center;justify-content:end;gap:10px;padding:12px 24px 0;border-top:1px solid var(--gray-200);margin-top:8px;}
+.btn-copy{padding:7px 16px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;border:1px solid rgba(79,70,229,.25);background:var(--primary-bg);color:var(--primary);transition:all .2s;}
 .btn-copy:hover{background:#DEDFFE;transform:translateY(-1px);box-shadow:0 3px 10px rgba(79,70,229,.15);}
 
-/* ===== 空状态 & 加载 ===== */
 .empty-state{text-align:center;padding:60px 20px;color:var(--gray-400);background:white;border-radius:0 0 12px 12px;}
-.empty-icon{font-size:48px;margin-bottom:12px;opacity:.5;}
-.loading-state{text-align:center;padding:60px 20px;color:var(--gray-400);background:white;border-radius:0 0 12px 12px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--gray-400);background:white;}
 .spinner{width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* ===== Footer ===== */
 .footer{text-align:center;padding:20px;color:var(--gray-400);font-size:12.5px;border-top:1px solid var(--gray-200);margin-top:32px;}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%)translateY(20px);background:var(--success);color:white;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%)translateY(0);}
 
-/* ===== Toast ===== */
-.toast{
-  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--success);color:white;padding:10px 24px;border-radius:10px;
-  font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ===== 响应式 ===== */
 @media(max-width:768px){
-  .header{padding:18px 16px;} .header h1{font-size:20px;}
-  .main{padding:16px;}
+  .header{padding:18px 16px;} .header h1{font-size:20px;} .main{padding:16px;}
   .talent-filters{padding:12px 16px;gap:8px;}
-  .filter-group{min-width:100px;}
-  .filter-group select,.filter-group input{min-width:100px;font-size:12px;padding:6px 10px;height:34px;}
+  .filter-group{min-width:95px;}
+  .multi-select-trigger{min-width:95px;padding:6px 10px;height:34px;font-size:12px;}
+  .filter-search{min-width:150px;}
   .header-stats{gap:12px;} .stat-item{padding:8px 12px;} .stat-item .num{font-size:20px;}
   .detail-grid{grid-template-columns:1fr;}
+  .multi-select-dropdown{max-width:240px;max-height:220px;}
 }
-
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:3px;}
-::-webkit-scrollbar-thumb:hover{background:var(--gray-400);}
+::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:3px;} ::-webkit-scrollbar-thumb:hover{background:var(--gray-400);}
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <header class="header">
   <h1>📊 达人看板 <span style="font-size:14px;font-weight:400;opacity:.75;">· 内部自用</span></h1>
   <p class="header-summary">历史沉淀 + 创造营建联 + 销售新增 · 合并展示 · 根据需求筛选匹配达人</p>
@@ -191,24 +197,16 @@ body {
 </header>
 
 <main class="main">
-
-<!-- 筛选 + 表格 -->
 <div class="filter-section">
   <!-- 筛选器 -->
   <div class="talent-filters">
-    <div class="filter-group"><label>达人来源</label><select id="fSource"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>等级</label><select id="fLevel"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>流转策略</label><select id="fStrategy"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>达人标签</label><select id="fTags"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>合作类型</label><select id="fCoopType"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>带货类型</label><select id="fSaleType"><option value="">全部</option></select></div>
-    <div class="filter-group"><label>撮合状态</label><select id="fMatchStatus"><option value="">全部</option></select></div>
+    <!-- 由JS动态生成多选下拉组件 -->
+
     <div class="filter-group filter-search"><label>搜索</label><input type="text" id="fSearch" placeholder="达人IP、账号、销售..." oninput="applyFilters()"></div>
     <span class="result-info" id="resultInfo"></span>
     <button class="btn-reset" onclick="resetFilters()">🔄 重置</button>
   </div>
 
-  <!-- 表格 -->
   <div class="table-wrapper">
     <table class="talent-table" id="talentTable">
       <thead><tr id="tableHead"></tr></thead>
@@ -216,177 +214,251 @@ body {
     </table>
   </div>
 
-  <!-- 空状态 -->
   <div class="empty-state" id="emptyState" style="display:none;">
     <div class="empty-icon">🔍</div>
     <p style="font-size:16px;color:var(--gray-600)">没有找到匹配的达人</p>
     <p style="font-size:13px;margin-top:6px;">尝试调整筛选条件或搜索关键词</p>
   </div>
-
-  <!-- 加载状态 -->
-  <div class="loading-state" id="loadingState">
-    <div class="spinner"></div>
-    <p>正在加载数据...</p>
-  </div>
+  <div class="loading-state" id="loadingState"><div class="spinner"></div><p>正在加载数据...</p></div>
 </div>
-
 </main>
 
 <footer class="footer">达人看板 · 数据来源：双轨合并本地版 · 静态部署</footer>
-
 <div class="toast" id="toast">✅ 已复制到剪贴板</div>
 
 <script>
 // ============================================================
-// 全局数据与配置
+// 配置
 // ============================================================
-
-let allData = [];       // 所有数据合并
+let allData = [];
 let expandedId = null;
 
-// 表格列定义：13个展示字段 + 操作列
 const TABLE_COLS = [
-  { key: '达人来源',     label: '来源',       width: '85px',   isSource: true },
-  { key: '达人IP',       label: '达人IP',     width: '',       sortable: true },
-  { key: '等级',         label: '等级',       width: '65px',   isLevel: true },
-  { key: '流转策略',     label: '流转策略',   width: '95px' },
-  { key: '销售归属',     label: '销售归属',   width: '130px' },
-  { key: '达人标签',     label: '达人标签',   width: '170px',  isTag: true },
-  { key: '粉丝画像',     label: '粉丝画像',   width: '110px' },
-  { key: '合作类型',     label: '合作类型',   width: '95px' },
-  { key: '带货类型',     label: '带货类型',   width: '95px' },
-  { key: '图书类目倾向', label: '图书类目',   width: '90px' },
-  { key: '课程类目倾向', label: '课程类目',   width: '90px' },
-  { key: '带货单价',     label: '单价',       width: '75px' },
-  { key: '撮合状态',     label: '撮合状态',   width: '90px' },
-  // 最后一列：操作
+  { key:'达人来源',label:'来源',width:'85px',isSource:true },
+  { key:'达人IP',label:'达人IP',width:'',sortable:true },
+  { key:'等级',label:'等级',width:'65px',isLevel:true },
+  { key:'流转策略',label:'流转策略',width:'95px' },
+  { key:'销售归属',label:'销售归属',width:'130px' },
+  { key:'达人标签',label:'达人标签',width:'170px',isTag:true },
+  { key:'粉丝画像',label:'粉丝画像',width:'110px' },
+  { key:'合作类型',label:'合作类型',width:'95px' },
+  { key:'带货类型',label:'带货类型',width:'95px' },
+  { key:'图书类目倾向',label:'图书类目',width:'90px' },
+  { key:'课程类目倾向',label:'课程类目',width:'90px' },
+  { key:'带货单价',label:'单价',width:'75px' },
+  { key:'撮合状态',label:'撮合状态',width:'90px' },
 ];
+
+// 筛选字段配置：fieldKey = 数据字段名, label=显示名, multiValued=是否需要拆分
+const FILTER_CONFIG = [
+  { field: '达人来源', label: '达人来源', multiValued: false },
+  { field: '等级',     label: '等级',   multiValued: false },
+  { field: '流转策略', label: '流转策略', multiValued: false },
+  { field: '达人标签', label: '达人标签', multiValued: true },
+  { field: '合作类型', label: '合作类型', multiValued: true },
+  { field: '带货类型', label: '带货类型', multiValued: true },
+  { field: '撮合状态', label: '撮合状态', multiValued: false },
+];
+
+// 存储每个筛选项的多选值
+const selectedValues = {}; // { fieldKey: Set([...values]) }
 
 // ============================================================
 // 初始化
 // ============================================================
 async function init() {
   try {
-    const [h, c, e] = await Promise.all([
+    const [h,c,e] = await Promise.all([
       fetch('./data/data_history.json').then(r=>r.json()).catch(()=>({data:[],options:{}})),
       fetch('./data/data_camp.json').then(r=>r.json()).catch(()=>({data:[],options:{}})),
       fetch('./data/data_extra.json').then(r=>r.json()).catch(()=>({data:[],options:{}}))
     ]);
-
-    // 合并所有数据为一个大数组
-    allData = [...h.data, ...c.data, ...e.data];
-
+    allData = [...h.data,...c.data,...e.data];
+    
     // 统计
-    const sourceCount = {};
-    allData.forEach(r => { sourceCount[r['达人来源']] = (sourceCount[r['达人来源']]||0) + 1; });
-
+    const sc={};
+    allData.forEach(r=>{sc[r['达人来源']]=(sc[r['达人来源']]||0)+1;});
     document.getElementById('headerStats').innerHTML =
       `<div class="stat-item"><span class="num">${allData.length}</span><span class="label">总计达人</span></div>` +
-      Object.entries(sourceCount).map(([k,v]) =>
-        `<div class="stat-item"><span class="num">${v}</span><span class="label">${k}</span></div>`
-      ).join('');
+      Object.entries(sc).map(([k,v])=>`<div class="stat-item"><span class="num">${v}</span><span class="label">${k}</span></div>`).join('');
 
-    // 构建筛选选项（从合并数据中提取）
-    buildFilterOptions(allData);
+    // 构建多选下拉
+    buildMultiSelects(allData);
 
-    // 渲染表头和表格
     renderHead();
     applyFilters();
 
-    // 绑定事件
-    ['fSource','fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
-      document.getElementById(id).addEventListener('change', () => applyFilters());
-    });
-
-    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('loadingState').style.display='none';
   } catch(e) {
-    console.error('初始化失败:', e);
-    document.getElementById('loadingState').innerHTML =
-      '<div class="empty-state"><div class="empty-icon">❌</div>' +
-      '<p style="color:var(--danger)">数据加载失败</p><p style="font-size:13px">'+e.message+'</p></div>';
+    console.error('初始化失败:',e);
+    document.getElementById('loadingState').innerHTML=
+      '<div class="empty-state"><div class="empty-icon">❌</div><p style="color:var(--danger)">数据加载失败</p><p style="font-size:13px">'+e.message+'</p></div>';
   }
 }
 
-// 需要拆分为独立选项的多值字段
-const MULTI_VALUE_FIELDS = ['合作类型','带货类型','达人标签','图书类目倾向','课程类目倾向'];
+const tagSplitRegex = /[,、/|；;\u3001;]/;
 
-function buildFilterOptions(data) {
-  // 单值字段：直接取唯一值
-  const extractUnique = (field) =>
-    [...new Set((data||[]).map(r => r[field]).filter(Boolean))].sort();
-
-  // 多值字段：先拆分每个单元格的复合值，再取去重后的独立选项
-  const extractSplitUnique = (field) => {
-    const tagSplitRegex = /[,、/|；;\u3001;]/;
-    const allValues = new Set();
-    (data||[]).forEach(r => {
-      const val = r[field];
-      if (val) val.split(tagSplitRegex).forEach(v => { v=v.trim(); if(v) allValues.add(v); });
-    });
-    return [...allValues].sort();
-  };
-
-  rebuildSelect('fSource', extractUnique('达人来源'));
-  rebuildSelect('fLevel', extractUnique('等级'));
-  rebuildSelect('fStrategy', extractUnique('流转策略'));
-  rebuildSelect('fTags', extractSplitUnique('达人标签'));
-  rebuildSelect('fCoopType', extractSplitUnique('合作类型'));
-  rebuildSelect('fSaleType', extractSplitUnique('带货类型'));
-  rebuildSelect('fMatchStatus', extractUnique('撮合状态'));
+function extractSplitUnique(field, data) {
+  const s=new Set();
+  (data||[]).forEach(r=>{
+    const v=r[field]; if(!v) return;
+    v.split(tagSplitRegex).forEach(t=>{t=t.trim();if(t)s.add(t);});
+  });
+  return [...s].sort();
 }
 
-function rebuildSelect(id, options) {
-  const el = document.getElementById(id);
-  el.innerHTML = '<option value="">全部</option>';
-  (options || []).forEach(v => {
-    const o = document.createElement('option');
-    o.value = v; o.textContent = v;
-    el.appendChild(o);
+// ============================================================
+// 构建/渲染多选下拉组件
+// ============================================================
+function buildMultiSelects(data) {
+  const container = document.querySelector('.talent-filters');
+  const searchInput = document.querySelector('.filter-search');
+
+  FILTER_CONFIG.forEach(cfg => {
+    const options = cfg.multiValued ? extractSplitUnique(cfg.field, data)
+                                    : [...new Set(data.map(r=>r[cfg.field]).filter(Boolean))].sort();
+    selectedValues[cfg.field] = new Set();
+
+    // 创建 DOM
+    const group = document.createElement('div');
+    group.className = 'filter-group';
+    group.innerHTML = `
+      <label>${cfg.label}</label>
+      <div class="multi-select-trigger" data-field="${cfg.field}" onclick="toggleDropdown('${cfg.field}')">
+        <span class="trigger-text" id="trigger-${cfg.field}">全部</span>
+        <span class="trigger-arrow">▼</span>
+        <span class="select-count" id="count-${cfg.field}" style="display:none">0</span>
+      </div>
+      <div class="multi-select-dropdown" id="dropdown-${cfg.field}">
+        <div class="dropdown-opt" data-field="${cfg.field}" data-val="__ALL__" onclick="toggleOption('${cfg.field}','__ALL__')">
+          <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="dropdown-opt-label">✓ 全部</span>
+        </div>
+        ${options.map(opt => `<div class="dropdown-opt" data-field="${cfg.field}" data-val="${escAttr(opt)}" onclick="toggleOption('${cfg.field}','${escAttr(opt)}')">
+          <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="dropdown-opt-label">${esc(opt)}</span>
+        </div>`).join('')}
+      </div>`;
+    
+    container.insertBefore(group, searchInput);
   });
+  
+  // 点击外部关闭
+  document.addEventListener('click', (e)=>{
+    if (!e.target.closest('.filter-group')) closeAllDropdowns();
+  });
+}
+
+function toggleDropdown(field) {
+  event.stopPropagation(); // 防止触发document关闭
+  const el=document.getElementById('dropdown-'+field);
+  const trigger=document.querySelector(`[data-field="${field}"].multi-select-trigger`);
+  const isOpen=el.classList.contains('show');
+  closeAllDropdowns();
+  if(!isOpen){el.classList.add('show');trigger.classList.add('active');}
+}
+
+function closeAllDropdowns(){
+  document.querySelectorAll('.multi-select-dropdown.show').forEach(d=>d.classList.remove('show'));
+  document.querySelectorAll('.multi-select-trigger.active').forEach(t=>t.classList.remove('active'));
+}
+
+function toggleOption(field, value) {
+  event.stopPropagation();
+  if(value==='__ALL__'){
+    // 全选/取消全选
+    if(selectedValues[field].size===0)return; // 已经是全部，不操作
+    selectedValues[field].clear(); // 清空=全部
+  } else {
+    // 如果之前是"全部"，先清空再添加第一个值
+    if(selectedValues[field].size===0 && !selectedValues[field]._wasSet){
+      // 还没选过任何东西，就是"全部"状态
+    }
+    if(selectedValues[field].has(value)){
+      selectedValues[field].delete(value);
+    } else {
+      selectedValues[field].add(value);
+    }
+    selectedValues[field]._wasSet=true;
+  }
+
+  updateTriggerUI(field);
+
+  // 更新"全部"选项的状态
+  const allOpt=document.querySelector(`#dropdown-${field} [data-val="__ALL__"]`);
+  if(allOpt) allOpt.classList.toggle('selected', selectedValues[field].size===0);
+
+  applyFilters();
+}
+
+function updateTriggerUI(field) {
+  const vals=selectedValues[field];
+  const triggerText=document.getElementById('trigger-'+field);
+  const countEl=document.getElementById('count-'+field);
+  const trigger=document.querySelector(`[data-field="${field}"].multi-select-trigger`);
+
+  if(vals.size===0){
+    triggerText.textContent='全部';triggerText.classList.remove('has-value');
+    countEl.style.display='none';
+  } else if(vals.size<=2){
+    triggerText.textContent=[...vals].join(' / ');
+    triggerText.classList.add('has-value');
+    countEl.style.display='none';
+  } else {
+    triggerText.textContent=[...vals].slice(0,2).join(' / ')+' ...';
+    triggerText.classList.add('has-value');
+    countEl.textContent=vals.size;countEl.style.display='inline-flex';
+  }
 }
 
 // ============================================================
 // 筛选逻辑
 // ============================================================
 function getFilteredData() {
-  const fSource = document.getElementById('fSource').value;
-  const level = document.getElementById('fLevel').value;
-  const strategy = document.getElementById('fStrategy').value;
-  const tags = document.getElementById('fTags').value;
-  const coopType = document.getElementById('fCoopType').value;
-  const saleType = document.getElementById('fSaleType').value;
-  const matchStatus = document.getElementById('fMatchStatus').value;
-  const q = (document.getElementById('fSearch').value || '').trim().toLowerCase();
+  const q=(document.getElementById('fSearch').value||'').trim().toLowerCase();
+  
+  return allData.filter(r=>{
+    for(const cfg of FILTER_CONFIG){
+      const sel=selectedValues[cfg.field];
+      if(sel.size===0) continue; // 空=不筛选该项
+      
+      const cellValue=String(r[cfg.field]||'');
+      
+      // 多值匹配：选中任一子项即命中
+      let matched=false;
+      for(const sv of sel){
+        if(cellValue.includes(sv)){matched=true;break;}
+      }
+      if(!matched) return false;
+    }
 
-  return allData.filter(r => {
-    if (fSource && r['达人来源'] !== fSource) return false;
-    if (level && r['等级'] !== level) return false;
-    if (strategy && !String(r['流转策略']||'').includes(strategy)) return false;
-    if (tags && !String(r['达人标签']||'').includes(tags)) return false;
-    if (coopType && !String(r['合作类型']||'').includes(coopType)) return false;
-    if (saleType && !String(r['带货类型']||'').includes(saleType)) return false;
-    if (matchStatus && !String(r['撮合状态']||'').includes(matchStatus)) return false;
-    if (q) {
-      const searchFields = ['达人IP','视频号账号','达人标签','粉丝画像','销售归属','达人来源','撮合客户'];
-      const text = searchFields.map(f => String(r[f]||'').toLowerCase()).join(' ');
-      if (!text.includes(q)) return false;
+    if(q){
+      const sf=['达人IP','视频号账号','达人标签','粉丝画像','销售归属','达人来源','撮合客户'];
+      const text=sf.map(f=>String(r[f]||'').toLowerCase()).join(' ');
+      if(!text.includes(q))return false;
     }
     return true;
   });
 }
 
 function applyFilters() {
-  const filtered = getFilteredData();
+  const filtered=getFilteredData();
   renderBody(filtered);
-  document.getElementById('resultInfo').textContent =
-    filtered.length !== allData.length ? `筛选结果：${filtered.length} / ${allData.length}` : `共 ${allData.length} 条`;
-  document.getElementById('emptyState').style.display = filtered.length ? 'none' : '';
+  document.getElementById('resultInfo').textContent=
+    filtered.length!==allData.length?`筛选结果：${filtered.length} / ${allData.length}`:`共 ${allData.length} 条`;
+  document.getElementById('emptyState').style.display=filtered.length?'none':'';
 }
 
 function resetFilters() {
-  document.getElementById('fSearch').value = '';
-  ['fSource','fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
-    document.getElementById(id).value = '';
+  document.getElementById('fSearch').value='';
+  FILTER_CONFIG.forEach(cfg=>{
+    selectedValues[cfg.field]=new Set();
+    updateTriggerUI(cfg.field);
+    // 重置"全部"高亮
+    const allOpt=document.querySelector(`#dropdown-${cfg.field} [data-val="__ALL__"]`);
+    if(allOpt) allOpt.classList.add('selected');
+    // 取消其他项高亮
+    document.querySelectorAll(`#dropdown-${cfg.field} .dropdown-opt:not([data-val="__ALL__"])`).forEach(o=>o.classList.remove('selected'));
   });
   applyFilters();
 }
@@ -394,170 +466,95 @@ function resetFilters() {
 // ============================================================
 // 渲染表格
 // ============================================================
-function renderHead() {
-  let html = TABLE_COLS.map(c =>
+function renderHead(){
+  let html=TABLE_COLS.map(c=>
     `<th class="${c.sortable?'sortable':''}" ${c.width?'style="width:'+c.width+'"':''} data-col="${c.key}">${esc(c.label)}</th>`
   ).join('');
-  html += '<th style="width:90px;text-align:center;">更多详情</th>'; // 操作列
-  document.getElementById('tableHead').innerHTML = html;
-
-  document.querySelectorAll('#tableHead th.sortable').forEach(th => {
-    th.onclick = () => sortBy(th.dataset.col);
+  html+='<th style="width:90px;text-align:center;">更多详情</th>';
+  document.getElementById('tableHead').innerHTML=html;
+  document.querySelectorAll('#tableHead th.sortable').forEach(th=>{
+    th.onclick=()=>sortBy(th.dataset.col);
   });
 }
 
-function renderBody(records) {
-  const tbody = document.getElementById('tableBody');
-  if (!records || records.length === 0) {
-    tbody.innerHTML = '';
-    return;
-  }
+function renderBody(records){
+  const tbody=document.getElementById('tableBody');
+  if(!records||!records.length){tbody.innerHTML='';return;}
 
-  const tagSplitRegex = /[,、/|；;\u3001;]/;
-
-  tbody.innerHTML = records.map(r => {
-    const isExpanded = expandedId === r._id;
-
-    // 数据单元格
-    let cells = TABLE_COLS.map(c => {
-      let val = r[c.key] || '';
-      if (c.isLevel) {
-        return `<td>${val ? '<span class="level-tag level-'+val+'">'+esc(val)+'</span>' : '-'}</td>`;
-      } else if (c.isTag && val) {
-        const tags = val.split(tagSplitRegex).map(t=>t.trim()).filter(Boolean).slice(0,4);
+  tbody.innerHTML=records.map(r=>{
+    const isExpanded=expandedId===r._id;
+    let cells=TABLE_COLS.map(c=>{
+      let val=r[c.key]||'';
+      if(c.isLevel){
+        return `<td>${val?'<span class="level-tag level-'+val+'">'+esc(val)+'</span>':'-'}</td>`;
+      }else if(c.isTag&&val){
+        const tags=val.split(tagSplitRegex).map(t=>t.trim()).filter(Boolean).slice(0,4);
         return `<td>${tags.map(t=>'<span class="tag-inline">'+esc(t)+'</span>').join('')}${tags.length<val.split(tagSplitRegex).length?'<span style="font-size:11px;color:var(--gray-400)">...</span>':''}</td>`;
-      } else if (c.isSource) {
-        const colors = {'历史在投':'#DBEAFE;color:#1E40AF','创造营':'#D1FAE5;color:#065F46','销售新增':'#FEF3C7;color:#92400E'};
-        const sc = colors[val] || '#F3F4F6;color:var(--gray-700)';
+      }else if(c.isSource){
+        const colors={'历史在投':'#DBEAFE;color:#1E40AF','创造营':'#D1FAE5;color:#065F46','销售新增':'#FEF3C7;color:#92400E'};
+        const sc=colors[val]||'#F3F4F6;color:var(--gray-700)';
         return `<td><span class="source-tag" style="background:${sc}">${esc(val)}</span></td>`;
-      } else {
+      }else{
         return `<td title="${esc(val)}">${esc(val)||'-'}</td>`;
       }
     }).join('');
 
-    // 更多详情按钮列
-    cells += `<td style="text-align:center;">
-      <button class="btn-detail ${isExpanded?'expanded':''}" onclick="event.stopPropagation();toggleExpand(${r._id})">
-        ${isExpanded?'▲ 收起详情':'▼ 更多详情'}
-      </button>
+    cells+=`<td style="text-align:center;">
+      <button class="btn-detail ${isExpanded?'expanded':''}" onclick="event.stopPropagation();toggleExpand(${r._id})">${isExpanded?'▲ 收起详情':'▼ 更多详情'}</button>
     </td>`;
 
-    // 展开的详情行
-    let detailRow = '';
-    if (isExpanded) {
-      const allFields = r._all_fields || {};
-      // 排除已展示的浅层字段，只显示额外字段
-      const shownKeys = new Set(TABLE_COLS.map(c => c.key));
-      const extraFields = Object.entries(allFields).filter(([k]) => !shownKeys.has(k));
-
-      const detailItems = extraFields.map(([k,v]) =>
-        `<div class="detail-field"><span class="detail-label">${esc(k)}</span><span class="detail-value">${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</span></div>`
-      ).join('');
-
-      const srcBadgeClass = {
-        '历史在投': 'detail-source-history',
-        '创造营': 'detail-source-camp',
-        '销售新增': 'detail-source-extra'
-      };
-      const srcLabel = r['达人来源'] || '';
-      const badgeCls = srcBadgeClass[srcLabel] || '';
-
-      detailRow = `<tr class="detail-row show"><td colspan="${TABLE_COLS.length+1}" class="detail-cell">
-        <span class="detail-source-badge ${badgeCls}">📋 来自「${esc(srcLabel)}」完整字段 (${extraFields.length}项)</span>
-        <div class="detail-grid">${detailItems}</div>
+    let detailRow='';
+    if(isExpanded){
+      const af=r._all_fields||{};
+      const shownKeys=new Set(TABLE_COLS.map(c=>c.key));
+      const extraFields=Object.entries(af).filter(([k])=>!shownKeys.has(k));
+      const di=extraFields.map(([k,v])=>`<div class="detail-field"><span class="detail-label">${esc(k)}</span><span class="detail-value">${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</span></div>`).join('');
+      const srcBadge={'历史在投':'detail-source-history','创造营':'detail-source-camp','销售新增':'detail-source-extra'};
+      const bc=srcBadge[r['达人来源']||'']||'';
+      detailRow=`<tr class="detail-row show"><td colspan="${TABLE_COLS.length+1}" class="detail-cell">
+        <span class="detail-source-badge ${bc}">📋 来自「${esc(r['达人来源']||'')}」完整字段 (${extraFields.length}项)</span>
+        <div class="detail-grid">${di}</div>
         <div class="detail-actions">
           <button class="btn-copy" onclick="event.stopPropagation();copyAll(${r._id})">📋 复制全部信息</button>
           <button class="btn-copy" onclick="event.stopPropagation();copyBasic(${r._id})">📋 仅复制基础信息</button>
         </div>
       </td></tr>`;
     }
-
-    return `<tr class="${isExpanded?'expanded':''}">${cells}</tr>${detailRow}`;
+    return`<tr class="${isExpanded?'expanded':''}">${cells}</tr>${detailRow}`;
   }).join('');
 }
 
-// ============================================================
-// 展开/收起详情
-// ============================================================
-function toggleExpand(id) {
-  expandedId = expandedId === id ? null : id;
+function toggleExpand(id){
+  expandedId=expandedId===id?null:id;
   applyFilters();
-  
-  if (expandedId) {
-    setTimeout(() => {
-      const row = document.querySelector('tr.expanded');
-      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 50);
-  }
+  if(expandedId)setTimeout(()=>{
+    const row=document.querySelector('tr.expanded');if(row)row.scrollIntoView({behavior:'smooth',block:'center'});
+  },50);
 }
 
-// ============================================================
 // 排序
-// ============================================================
-let sortCol = null, sortDir = 'asc';
-
-function sortBy(colKey) {
-  if (sortCol === colKey) {
-    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortCol = colKey; sortDir = 'asc';
-  }
-
-  document.querySelectorAll('#tableHead th').forEach(th => {
-    th.classList.remove('sorted-asc', 'sorted-desc');
-    if (th.dataset.col === sortCol) th.classList.add(sortDir==='asc'?'sorted-asc':'sorted-desc');
+let sortCol=null,sortDir='asc';
+function sortBy(colKey){
+  if(sortCol===colKey)sortDir=sortDir==='asc'?'desc':'asc';
+  else{sortCol=colKey;sortDir='asc';}
+  document.querySelectorAll('#tableHead th').forEach(th=>{
+    th.classList.remove('sorted-asc','sorted-desc');
+    if(th.dataset.col===sortCol)th.classList.add(sortDir==='asc'?'sorted-asc':'sorted-desc');
   });
-
-  const records = getFilteredData();
-  records.sort((a,b) => {
-    const va = a[sortCol]||''; const vb = b[sortCol]||'';
-    return String(va).localeCompare(String(vb), 'zh-CN', {numeric:true}) * (sortDir==='asc'?1:-1);
-  });
-  
-  const total = allData.length;
+  const records=getFilteredData();
+  records.sort((a,b)=>{const va=a[sortCol]||'',vb=b[sortCol]||'';return String(va).localeCompare(String(vb),'zh-CN',{numeric:true})*(sortDir==='asc'?1:-1);});
   renderBody(records);
-  document.getElementById('resultInfo').textContent =
-    `筛选结果：${records.length} / ${total} · 按 ${TABLE_COLS.find(c=>c.key===sortCol)?.label||sortCol} ${sortDir==='asc'?'↑升序':'↓降序'}`;
+  document.getElementById('resultInfo').textContent=`筛选结果：${records.length}/${allData.length}·按${TABLE_COLS.find(c=>c.key===sortCol)?.label||sortCol}${sortDir==='asc'?'↑升序':'↓降序'}`;
 }
 
-// ============================================================
 // 工具函数
-// ============================================================
-function esc(s) {
-  if (s===null||s===undefined) return '';
-  const d=document.createElement('div'); d.textContent=s; return d.innerHTML.replace(/"/g,'&quot;');
-}
+function esc(s){if(s===null||s===undefined)return '';const d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/"/g,'&quot;');}
+function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg||'✅已复制到剪贴板';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
+function copyAll(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.clipboard.writeText(Object.entries(r._all_fields||{}).map(([k,v])=>`${k}:${v}`).join('\n')).then(()=>showToast('✅已复制全部字段'));}
+function copyBasic(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.clipboard.writeText(['达人IP:'+r['达人IP'],'来源:'+r['达人来源'],'等级:'+r['等级'],'流转策略:'+r['流转策略'],'销售归属:'+r['销售归属'],'标签:'+r['达人标签'],'粉丝画像:'+r['粉丝画像'],'合作类型:'+r['合作类型'],'带货类型:'+r['带货类型'],'图书类目:'+r['图书类目倾向'],'课程类目:'+r['课程类目倾向'],'单价:'+r['带货单价'],'撮合状态:'+r['撮合状态']].join('\n')).then(()=>showToast('✅已复制基础信息'));}
 
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg||'✅ 已复制到剪贴板';
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500);
-}
-
-function copyAll(id) {
-  const r=allData.find(x=>x._id===id); if(!r)return;
-  const lines=Object.entries(r._all_fields||{}).map(([k,v])=>`${k}: ${v}`).join('\n');
-  navigator.clipboard.writeText(lines).then(()=>showToast('✅ 已复制全部字段'));
-}
-
-function copyBasic(id) {
-  const r=allData.find(x=>x._id===id); if(!r)return;
-  const lines=[
-    `达人IP: ${r['达人IP']}`,`来源: ${r['达人来源']}`,`等级: ${r['等级']}`,
-    `流转策略: ${r['流转策略']}`,`销售归属: ${r['销售归属']}`,
-    `标签: ${r['达人标签']}`,`粉丝画像: ${r['粉丝画像']}`,
-    `合作类型: ${r['合作类型']}`,`带货类型: ${r['带货类型']}`,
-    `图书类目: ${r['图书类目倾向']}`,`课程类目: ${r['课程类目倾向']}`,
-    `单价: ${r['带货单价']}`,`撮合状态: ${r['撮合状态']}`
-  ].join('\n');
-  navigator.clipboard.writeText(lines).then(()=>showToast('✅ 已复制基础信息'));
-}
-
-// 快捷键
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus();}
-  if (e.key==='Escape') resetFilters();
-});
-
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus()} if(e.key==='Escape'){closeAllDropdowns();resetFilters()}});
 init();
 </script>
 </body>
