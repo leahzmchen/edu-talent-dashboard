@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>达人看板 - 内部工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义样式 */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+            --border-color: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-orange: #f97316;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Tab 样式 */
+        .tab-btn {
+            padding: 10px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* 筛选器样式 */
+        .filter-select {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+            min-width: 120px;
+        }
+        .filter-select:focus { border-color: var(--primary); }
+
+        .search-input {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 16px 10px 40px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            width: 280px;
+            transition: all 0.2s;
+        }
+        .search-input:focus { 
+            border-color: var(--primary); 
+            width: 360px;
+        }
+        .search-wrapper { position: relative; }
+        .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--text-secondary); pointer-events: none;
+        }
+
+        /* 达人卡片 */
+        .talent-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .talent-card:hover {
+            background: var(--card-hover);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+        .talent-card.expanded {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary), 0 8px 30px rgba(59,130,246,0.2);
+        }
+
+        /* 等级标签颜色 */
+        .level-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .level-A { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a1a1a; }
+        .level-B { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .level-C { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+        .level-D { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+        .level-E { background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: white; }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 2px 4px 2px 0;
+        }
+
+        /* 详情面板 */
+        .detail-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease-out;
+            background: rgba(15, 23, 42, 0.6);
+            border-top: 1px solid transparent;
+        }
+        .detail-panel.show {
+            max-height: 800px;
+            border-top-color: var(--border-color);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 8px 24px;
+            padding: 16px 20px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(148,163,184,0.15);
+        }
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 13px;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        /* 统计信息 */
+        .stat-badge {
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+            border: 1px solid rgba(59,130,246,0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #93c5fd;
+        }
+        .stat-number {
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            margin-right: 4px;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 60px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+
+        /* 展开箭头 */
+        .expand-arrow {
+            transition: transform 0.25s ease;
+            color: var(--text-secondary);
+        }
+        .expanded > .card-main > .expand-arrow {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .search-input { width: 200px; }
+            .search-input:focus { width: 240px; }
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+
+        /* 复制提示 */
+        .copy-toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-green); color: white; padding: 10px 24px;
+            border-radius: 10px; font-size: 14px; font-weight: 500;
+            opacity: 0; transition: opacity 0.3s; z-index: 9999;
+            pointer-events: none;
+        }
+        .copy-toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#0f172a]/90 border-b border-[#334155]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📊</span>
+                    <h1 class="text-lg font-bold text-white">达人看板</h1>
+                    <span class="text-xs text-gray-500 hidden sm:inline">内部工具 v1.0</span>
+                </div>
+                <div id="update-time" class="text-xs text-gray-500 hidden sm:block"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <!-- Tab 切换 -->
+        <div class="flex items-center border-b border-[#334155] mb-6">
+            <button class="tab-btn active" data-tab="history" onclick="switchTab('history')">
+                📚 历史沉淀 <span id="count-history" class="stat-badge ml-2">0</span>
+            </button>
+            <button class="tab-btn" data-tab="camp" onclick="switchTab('camp')">
+                🚀 创造营建联 <span id="count-camp" class="stat-badge ml-2">0</span>
+            </button>
+            <button class="tab-btn" data-tab="extra" onclick="switchTab('extra')">
+                ➕ 销售新增 <span id="count-extra" class="stat-badge ml-2">0</span>
+            </button>
+
+            <!-- 筛选区域 -->
+            <div class="ml-auto flex items-center gap-3 flex-wrap py-2">
+                <div class="search-wrapper">
+                    <svg class="search-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="search-input" class="search-input" placeholder="搜索达人IP、标签、账号..." oninput="applyFilters()">
+                </div>
+                
+                <select id="filter-level" class="filter-select" onchange="applyFilters()">
+                    <option value="">全部等级</option>
+                </select>
+                
+                <select id="filter-tags" class="filter-select" onchange="applyFilters()">
+                    <option value="">全部标签</option>
+                </select>
+                
+                <select id="filter-coop" class="filter-select" onchange="applyFilters()">
+                    <option value="">全部合作类型</option>
+                </select>
+
+                <button onclick="resetFilters()" class="text-sm text-gray-400 hover:text-white px-3 py-1.5 transition-colors">
+                    重置
+                </button>
+            </div>
+        </div>
+
+        <!-- 结果计数 -->
+        <div class="flex items-center justify-between mb-4">
+            <div id="result-count" class="text-sm text-gray-400">
+                显示 <span class="text-white font-semibold">0</span> 条结果
+            </div>
+            <div id="result-summary" class="text-xs text-gray-500"></div>
+        </div>
+
+        <!-- 数据加载状态 -->
+        <div id="loading-state">
+            <div class="loading-spinner"></div>
+            <p class="text-center text-gray-500 mt-4">正在加载数据...</p>
+        </div>
+
+        <!-- 空结果状态 -->
+        <div id="empty-state" class="empty-state hidden">
+            <div class="empty-icon">🔍</div>
+            <p class="text-lg">没有找到匹配的达人</p>
+            <p class="text-sm mt-2">尝试调整筛选条件或搜索关键词</p>
+        </div>
+
+        <!-- 达人卡片列表 -->
+        <div id="talent-list"></div>
+    </main>
+
+    <!-- 复制成功提示 -->
+    <div id="copy-toast" class="copy-toast">✅ 已复制到剪贴板</div>
+
+    <script>
+        // ========== 全局数据 ==========
+        const DATA = {};
+        let currentTab = 'history';
+        
+        // ========== 共同字段定义（用于卡片展示的浅层字段）==========
+        const CARD_FIELDS = [
+            { key: '达人来源', label: '来源', icon: '📌' },
+            { key: '等级', label: '等级', icon: '⭐', isLevel: true },
+            { key: '销售归属', label: '销售', icon: '👤' },
+            { key: '达人标签', label: '标签', icon: '🏷️', isTags: true },
+            { key: '粉丝画像', label: '画像', icon: '👥' },
+            { key: '合作类型', label: '合作', icon: '🤝' },
+            { key: '带货类型', label: '带货', icon: '📦' },
+            { key: '带货单价', label: '单价', icon: '💰' },
+            { key: '撮合状态', label: '撮合状态', icon: '📋' },
+        ];
+
+        // ========== 初始化 ==========
+        async function init() {
+            try {
+                await loadData();
+                renderList();
+            } catch (e) {
+                console.error('初始化失败:', e);
+                document.getElementById('loading-state').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <p class="text-lg text-red-400">数据加载失败</p>
+                        <p class="text-sm mt-2">${e.message}</p>
+                    </div>`;
+            }
+        }
+
+        async function loadData() {
+            // 并行加载三个 JSON 文件
+            const [historyData, campData, extraData] = await Promise.all([
+                fetch('./data/data_history.json').then(r => r.json()),
+                fetch('./data/data_camp.json').then(r => r.json()),
+                fetch('./data/data_extra.json').then(r => r.json()).catch(() => ({ data: [], options: {} }))
+            ]);
+
+            DATA.history = historyData;
+            DATA.camp = campData;
+            DATA.extra = extraData;
+
+            // 更新统计数字
+            document.getElementById('count-history').innerHTML = `<span class="stat-number">${historyData.data.length}</span>人`;
+            document.getElementById('count-camp').innerHTML = `<span class="stat-number">${campData.data.length}</span>人`;
+            document.getElementById('count-extra').innerHTML = `<span class="stat-number">(extraData.data.length || 0)</span>人`;
+
+            // 更新时间
+            if (historyData.meta?.updated_at) {
+                document.getElementById('update-time').textContent = `更新于 ${historyData.meta.updated_at.split('T')[0]}`;
+            }
+
+            // 隐藏加载状态
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+
+        // ========== Tab 切换 ==========
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // 更新 tab 按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+
+            // 重建筛选选项
+            buildFilterOptions();
+
+            // 重新渲染列表
+            applyFilters();
+        }
+
+        function buildFilterOptions() {
+            const sourceData = DATA[currentTab];
+            if (!sourceData?.options) return;
+
+            const options = sourceData.options;
+
+            // 等级筛选
+            const levelSel = document.getElementById('filter-level');
+            const curLevel = levelSel.value;
+            levelSel.innerHTML = '<option value="">全部等级</option>';
+            (options['等级'] || []).forEach(v => {
+                levelSel.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+            levelSel.value = curLevel;
+
+            // 标签筛选
+            const tagsSel = document.getElementById('filter-tags');
+            const curTag = tagsSel.value;
+            tagsSel.innerHTML = '<option value="">全部标签</option>';
+            (options['达人标签'] || []).forEach(v => {
+                tagsSel.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+            tagsSel.value = curTag;
+
+            // 合作类型筛选
+            const coopSel = document.getElementById('filter-coop');
+            const curCoop = coopSel.value;
+            coopSel.innerHTML = '<option value="">全部合作类型</option>';
+            (options['合作类型'] || []).forEach(v => {
+                coopSel.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+            coopSel.value = curCoop;
+        }
+
+        // ========== 筛选与搜索 ==========
+        function applyFilters() {
+            const keyword = document.getElementById('search-input').value.toLowerCase().trim();
+            const levelFilter = document.getElementById('filter-level').value;
+            const tagFilter = document.getElementById('filter-tags').value;
+            const coopFilter = document.getElementById('filter-coop').value;
+
+            let records = DATA[currentTab]?.data || [];
+
+            // 关键词搜索（在多个字段中模糊匹配）
+            if (keyword) {
+                const searchFields = ['达人IP', '视频号账号', '达人标签', '粉丝画像', '销售归属', '达人来源'];
+                records = records.filter(r => {
+                    return searchFields.some(field => {
+                        const val = r[field] || '';
+                        return val.toLowerCase().includes(keyword);
+                    });
+                });
+            }
+
+            // 等级筛选
+            if (levelFilter) {
+                records = records.filter(r => r['等级'] === levelFilter);
+            }
+
+            // 标签筛选（支持多值匹配）
+            if (tagFilter) {
+                records = records.filter(r => {
+                    const tags = r['达人标签'] || '';
+                    // 处理逗号、顿号等分隔符
+                    return tags.includes(tagFilter);
+                });
+            }
+
+            // 合作类型筛选
+            if (coopFilter) {
+                records = records.filter(r => r['合作类型'] === coopFilter);
+            }
+
+            renderCards(records);
+            
+            // 更新计数
+            const total = DATA[currentTab]?.data?.length || 0;
+            document.getElementById('result-count').innerHTML = 
+                `显示 <span class="text-white font-semibold">${records.length}</span> / ${total} 条结果`;
+        }
+
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-level').value = '';
+            document.getElementById('filter-tags').value = '';
+            document.getElementById('filter-coop').value = '';
+            applyFilters();
+        }
+
+        // ========== 渲染列表 ==========
+        function renderList() {
+            buildFilterOptions();
+            applyFilters();
+        }
+
+        function renderCards(records) {
+            const container = document.getElementById('talent-list');
+            const emptyState = document.getElementById('empty-state');
+
+            if (!records || records.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = records.map((r, idx) => createCardHTML(r, idx)).join('');
+        }
+
+        function createCardHTML(record, index) {
+            const name = record['达人IP'] || '未命名';
+            const level = record['等级'] || '-';
+            const tags = record['达人标签'] || '';
+            const price = record['带货单价'] || '-';
+
+            // 卡片顶部字段行（紧凑布局）
+            const topFields = CARD_FIELDS.map(f => {
+                let val = record[f.key] || '';
+                let content = '';
+
+                if (f.isLevel) {
+                    content = val ? `<span class="level-tag level-${val}">${val}</span>` : '<span class="text-gray-500">-</span>';
+                } else if (f.isTags && val) {
+                    // 标签拆分显示
+                    const tagList = val.split(/[,、\/|；;]/).map(t => t.trim()).filter(Boolean).slice(0, 4);
+                    content = tagList.map(t => `<span class="tag">${t}</span>`).join('') + 
+                              (val.split(/[,、\/|；;/]).length > 4 ? '<span class="text-xs text-gray-500">...</span>' : '');
+                } else if (val) {
+                    content = `<span class="text-sm">${escapeHtml(val)}</span>`;
+                } else {
+                    content = '<span class="text-gray-600 text-sm">-</span>';
+                }
+
+                return `<div class="flex items-center gap-1.5"><span class="text-gray-500 text-xs whitespace-nowrap">${f.icon}</span>${content}</div>`;
+            }).join('');
+
+            // 详情面板（所有原始字段）
+            const allFields = record['_all_fields'] || {};
+            const detailItems = Object.entries(allFields)
+                .filter(([k, v]) => v !== '' && v !== null && v !== undefined)
+                .map(([key, value]) => `
+                    <div class="detail-item">
+                        <span class="detail-label">${escapeHtml(key)}</span>
+                        <span class="detail-value">${escapeHtml(String(value))}</span>
+                    </div>
+                `).join('');
+
+            return `
+                <div class="talent-card" data-id="${record._id}" onclick="toggleDetail(this)">
+                    <div class="card-main">
+                        <!-- 第一行：名称 + 等级 + 展开 -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl font-bold text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="event.stopPropagation(); copyText('${escapeHtml(name)}')">
+                                    ${escapeHtml(name)}
+                                </span>
+                                ${level !== '-' ? `<span class="level-tag level-${level}">${level}</span>` : ''}
+                                <span class="text-xs text-gray-500">#${record._id || (index + 1)}</span>
+                            </div>
+                            <svg class="expand-arrow w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+
+                        <!-- 第二行：关键字段网格 -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-2">
+                            ${topFields}
+                        </div>
+
+                        <!-- 第三行：快捷信息（销售 + 单价 + 撮合状态） -->
+                        <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-700/50 text-xs text-gray-400">
+                            <span>👤 ${escapeHtml(record['销售归属'] || '-')}</span>
+                            <span>💰 ${escapeHtml(price)}</span>
+                            ${record['撮合状态'] ? `<span class="text-yellow-400/80">📋 ${escapeHtml(record['撮合状态'])}</span>` : ''}
+                            ${record['视频号账号'] ? `<span class="truncate max-w-[200px]" title="${escapeHtml(record['视频号账号'])}">🎬 ${escapeHtml(record['视频号账号'])}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- 详情面板（点击展开） -->
+                    <div class="detail-panel">
+                        <div class="detail-grid">
+                            ${detailItems}
+                        </div>
+                        <div class="px-5 pb-4 pt-1 flex items-center justify-end gap-3">
+                            <button onclick="event.stopPropagation(); copyAllFields(${record._id})" 
+                                    class="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors">
+                                📋 复制全部信息
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== 交互功能 ==========
+        function toggleDetail(card) {
+            const wasExpanded = card.classList.contains('expanded');
+            
+            // 关闭其他已展开的卡片
+            document.querySelectorAll('.talent-card.expanded').forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('expanded');
+                    c.querySelector('.detail-panel').classList.remove('show');
+                }
+            });
+
+            // 切换当前卡片
+            card.classList.toggle('expanded');
+            const panel = card.querySelector('.detail-panel');
+            if (!wasExpanded) {
+                setTimeout(() => panel.classList.add('show'), 10);
+            } else {
+                panel.classList.remove('show');
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => showToast());
+        }
+
+        function copyAllFields(id) {
+            const record = DATA[currentTab]?.data.find(r => r._id === id);
+            if (!record) return;
+            
+            const lines = Object.entries(record['_all_fields'] || {})
+                .map(([k, v]) => `${k}: ${v}`)
+                .join('\n');
+            navigator.clipboard.writeText(lines).then(() => showToast());
+        }
+
+        function showToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1500);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML.replace(/"/g, '&quot;');
+        }
+
+        // ========== 键盘快捷键 ==========
+        document.addEventListener('keydown', e => {
+            // Ctrl/Cmd+F 聚焦搜索框
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+            // ESC 清空搜索
+            if (e.key === 'Escape') {
+                resetFilters();
+            }
+        });
+
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>
