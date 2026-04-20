@@ -78,15 +78,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 }
 .dropdown-opt:hover{background:var(--primary-bg);}
 .dropdown-opt.selected{background:#EDE9FE;color:var(--primary-dark);}
-/* 自定义checkbox */
+/* 自定义checkbox - 确保打勾同步显示 */
 .dropdown-cb{
   width:16px;height:16px;border:2px solid var(--gray-300);border-radius:4px;
   flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
+  transition:all .15s;background:white;
 }
-.dropdown-opt.selected .dropdown-cb{background:var(--primary);border-color:var(--primary);}
 .dropdown-cb svg{width:11px;height:11px;color:white;opacity:0;transition:opacity .15s;}
-.dropdown-opt.selected .dropdown-cb svg{opacity:1;}
+/* 关键修复：selected 状态下 checkbox 显示打勾 */
+.dropdown-opt.selected > .dropdown-cb{background:var(--primary);border-color:var(--primary);}
+.dropdown-opt.selected > .dropdown-cb svg{opacity:1;}
+
+/* 灰掉的不可用选项 */
+.dropdown-opt.disabled{opacity:0.35;pointer-events:none;}
+.dropdown-opt.disabled .dropdown-cb{border-color:var(--gray-200);}
+
 .dropdown-opt-label{line-height:1.3;}
 
 /* 计数角标 */
@@ -150,19 +156,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .btn-detail:hover{background:#DEDFFE;transform:translateY(-1px);box-shadow:0 3px 8px rgba(79,70,229,.15);}
 .btn-detail.expanded{background:var(--primary);color:white;border-color:var(--primary);}
 
-/* ===== 详情行 ===== */
+/* ===== 详情行 - 紧凑布局，避免误读 ===== */
 .detail-row{display:none;background:linear-gradient(135deg,#FBFAFE,#F5F3FF);}
 .detail-row.show{display:table-row;}
 .detail-cell{padding:16px 24px!important;vertical-align:top!important;white-space:normal!important;overflow:visible!important;}
-.detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px 28px;}
-.detail-field{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px dashed rgba(148,163,184,.2);}
-.detail-label{color:var(--gray-500);font-size:12.5px;white-space:nowrap;flex-shrink:0;margin-right:10px;min-width:90px;}
-.detail-value{color:var(--gray-800);font-size:12.5px;text-align:right;word-break:break-all;font-weight:500;}
-.detail-source-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600;margin-bottom:10px;}
+.detail-source-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600;margin-bottom:12px;}
 .detail-source-history{background:#DBEAFE;color:#1E40AF;}
 .detail-source-camp{background:#D1FAE5;color:#065F46;}
 .detail-source-extra{background:#FEF3C7;color:#92400E;}
-.detail-actions{display:flex;align-items:center;justify-content:end;gap:10px;padding:12px 24px 0;border-top:1px solid var(--gray-200);margin-top:8px;}
+
+/* 紧凑详情表格 - 每行一个字段，key-value 左右对齐 */
+.detail-table{width:100%;border-collapse:collapse;}
+.detail-table tr{border-bottom:1px solid var(--gray-100);}
+.detail-table tr:last-child{border-bottom:none;}
+.detail-table td{padding:7px 16px 7px 0;font-size:13px;vertical-align:top;}
+.detail-table td:first-child{color:var(--gray-500);font-size:12.5px;width:160px;white-space:nowrap;font-weight:500;}
+.detail-table td:last-child{color:var(--gray-800);font-weight:500;word-break:break-all;}
+
+.detail-actions{display:flex;align-items:center;justify-content:end;gap:10px;padding:12px 0 0;border-top:1px solid var(--gray-200);margin-top:8px;}
 .btn-copy{padding:7px 16px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;border:1px solid rgba(79,70,229,.25);background:var(--primary-bg);color:var(--primary);transition:all .2s;}
 .btn-copy:hover{background:#DEDFFE;transform:translateY(-1px);box-shadow:0 3px 10px rgba(79,70,229,.15);}
 
@@ -181,7 +192,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
   .multi-select-trigger{min-width:95px;padding:6px 10px;height:34px;font-size:12px;}
   .filter-search{min-width:150px;}
   .header-stats{gap:12px;} .stat-item{padding:8px 12px;} .stat-item .num{font-size:20px;}
-  .detail-grid{grid-template-columns:1fr;}
+  .detail-table td:first-child{width:120px;}
   .multi-select-dropdown{max-width:240px;max-height:220px;}
 }
 ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:transparent;}
@@ -249,7 +260,7 @@ const TABLE_COLS = [
   { key:'撮合状态',label:'撮合状态',width:'90px' },
 ];
 
-// 筛选字段配置：fieldKey = 数据字段名, label=显示名, multiValued=是否需要拆分
+// 筛选字段配置（顺序即UI顺序）
 const FILTER_CONFIG = [
   { field: '达人来源', label: '达人来源', multiValued: false },
   { field: '等级',     label: '等级',   multiValued: false },
@@ -262,6 +273,9 @@ const FILTER_CONFIG = [
 
 // 存储每个筛选项的多选值
 const selectedValues = {}; // { fieldKey: Set([...values]) }
+
+// 缓存每个字段的所有原始选项（从全部数据中提取，不随筛选变化）
+const allFieldOptions = {}; // { fieldKey: string[] }
 
 // ============================================================
 // 初始化
@@ -282,8 +296,16 @@ async function init() {
       `<div class="stat-item"><span class="num">${allData.length}</span><span class="label">总计达人</span></div>` +
       Object.entries(sc).map(([k,v])=>`<div class="stat-item"><span class="num">${v}</span><span class="label">${k}</span></div>`).join('');
 
+    // 提取并缓存所有字段的完整选项列表
+    for (const cfg of FILTER_CONFIG) {
+      const opts = cfg.multiValued ? extractSplitUnique(cfg.field, allData)
+                                    : [...new Set(allData.map(r => r[cfg.field]).filter(Boolean))].sort();
+      allFieldOptions[cfg.field] = opts;
+      selectedValues[cfg.field] = new Set();
+    }
+
     // 构建多选下拉
-    buildMultiSelects(allData);
+    buildMultiSelects();
 
     renderHead();
     applyFilters();
@@ -308,20 +330,39 @@ function extractSplitUnique(field, data) {
 }
 
 // ============================================================
+// 获取当前已选前置筛选器的交集数据
+// （用于后续筛选器的级联收窄）
+// ============================================================
+function getCascadedSubset(upToFieldIndex) {
+  let subset = [...allData];
+  for (let i = 0; i < upToFieldIndex; i++) {
+    const cfg = FILTER_CONFIG[i];
+    const sel = selectedValues[cfg.field];
+    if (sel.size === 0) continue;
+    subset = subset.filter(r => {
+      const cellValue = String(r[cfg.field] || '');
+      for (const sv of sel) {
+        if (cellValue.includes(sv)) return true;
+      }
+      return false;
+    });
+  }
+  return subset;
+}
+
+// ============================================================
 // 构建/渲染多选下拉组件
 // ============================================================
-function buildMultiSelects(data) {
+function buildMultiSelects() {
   const container = document.querySelector('.talent-filters');
   const searchInput = document.querySelector('.filter-search');
 
-  FILTER_CONFIG.forEach(cfg => {
-    const options = cfg.multiValued ? extractSplitUnique(cfg.field, data)
-                                    : [...new Set(data.map(r=>r[cfg.field]).filter(Boolean))].sort();
-    selectedValues[cfg.field] = new Set();
-
+  FILTER_CONFIG.forEach((cfg, idx) => {
     // 创建 DOM
     const group = document.createElement('div');
     group.className = 'filter-group';
+    group.id = `filterGroup-${cfg.field}`;
+    
     group.innerHTML = `
       <label>${cfg.label}</label>
       <div class="multi-select-trigger" data-field="${cfg.field}" onclick="toggleDropdown('${cfg.field}')">
@@ -330,16 +371,11 @@ function buildMultiSelects(data) {
         <span class="select-count" id="count-${cfg.field}" style="display:none">0</span>
       </div>
       <div class="multi-select-dropdown" id="dropdown-${cfg.field}">
-        <div class="dropdown-opt" data-field="${cfg.field}" data-val="__ALL__" onclick="toggleOption('${cfg.field}','__ALL__')">
-          <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-          <span class="dropdown-opt-label">✓ 全部</span>
+        <div class="dropdown-option-list" id="optionList-${cfg.field}">
+          ${renderOptions(cfg.field)}
         </div>
-        ${options.map(opt => `<div class="dropdown-opt" data-field="${cfg.field}" data-val="${escAttr(opt)}" onclick="toggleOption('${cfg.field}','${escAttr(opt)}')">
-          <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-          <span class="dropdown-opt-label">${esc(opt)}</span>
-        </div>`).join('')}
       </div>`;
-    
+
     container.insertBefore(group, searchInput);
   });
   
@@ -347,14 +383,86 @@ function buildMultiSelects(data) {
   document.addEventListener('click', (e)=>{
     if (!e.target.closest('.filter-group')) closeAllDropdowns();
   });
+
+  // 初始更新所有 UI 状态
+  FILTER_CONFIG.forEach(cfg => refreshDropdownOptions(cfg));
+}
+
+function renderOptions(field) {
+  const cfg = FILTER_CONFIG.find(c => c.field === field);
+  const idx = FILTER_CONFIG.indexOf(cfg);
+
+  // 获取当前前置筛选的交集数据，从中提取可用选项
+  const subset = getCascadedSubset(idx);
+  let options = cfg.multiValued ? extractSplitUnique(field, subset)
+                                : [...new Set(subset.map(r => r[field]).filter(Boolean))].sort();
+
+  // 如果前面没有筛选，使用全部数据
+  if (idx === 0 || subset.length === 0) {
+    options = allFieldOptions[field] || [];
+  } else if (!options.length && allFieldOptions[field]?.length) {
+    // 交集为空但全局有选项——显示全部但灰掉（极端情况兜底）
+    options = allFieldOptions[field];
+  }
+
+  // 当前选中值
+  const selected = selectedValues[field];
+
+  // 全部选项 HTML
+  let html = `<div class="dropdown-opt${selected.size === 0 ? ' selected' : ''}" data-field="${field}" data-val="__ALL__" onclick="toggleOption('${field}','__ALL__')">
+    <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+    <span class="dropdown-opt-label">✓ 全部</span>
+  </div>`;
+
+  // 获取当前子集可用的选项集合
+  const availableSet = new Set(options);
+
+  for (const opt of (allFieldOptions[field] || [])) {
+    const isAvailable = availableSet.has(opt);
+    const isSelected = selected.has(opt);
+    html += `<div class="dropdown-opt${isSelected ? ' selected' : ''}${!isAvailable ? ' disabled' : ''}"
+      data-field="${field}" data-val="${escAttr(opt)}"
+      onclick="${isAvailable ? "toggleOption('" + field + "','" + escAttr(opt) + "')" : ''}">
+      <span class="dropdown-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="dropdown-opt-label">${esc(opt)}</span>
+    </div>`;
+  }
+
+  return html;
+}
+
+/** 刷新指定筛选器的下拉选项列表和 checkbox 状态（核心修复） */
+function refreshDropdownOptions(cfg) {
+  const field = cfg.field;
+  const optionListEl = document.getElementById(`optionList-${field}`);
+  if (!optionListEl) return;
+
+  // 重新渲染选项 HTML
+  optionListEl.innerHTML = renderOptions(field);
+
+  // 更新触发器文字
+  updateTriggerUI(field);
+}
+
+/** 刷新所有后续筛选器（级联更新） */
+function refreshSubsequentDropdowns(fromIndex) {
+  for (let i = fromIndex; i < FILTER_CONFIG.length; i++) {
+    const cfg = FILTER_CONFIG[i];
+    refreshDropdownOptions(cfg);
+  }
 }
 
 function toggleDropdown(field) {
-  event.stopPropagation(); // 防止触发document关闭
+  event.stopPropagation();
   const el=document.getElementById('dropdown-'+field);
   const trigger=document.querySelector(`[data-field="${field}"].multi-select-trigger`);
   const isOpen=el.classList.contains('show');
   closeAllDropdowns();
+  
+  // 打开前刷新选项列表（确保级联收窄是最新的）
+  const cfgIdx = FILTER_CONFIG.findIndex(c => c.field === field);
+  refreshDropdownOptions(FILTER_CONFIG[cfgIdx]);
+  
   if(!isOpen){el.classList.add('show');trigger.classList.add('active');}
 }
 
@@ -366,14 +474,12 @@ function closeAllDropdowns(){
 function toggleOption(field, value) {
   event.stopPropagation();
   if(value==='__ALL__'){
-    // 全选/取消全选
-    if(selectedValues[field].size===0)return; // 已经是全部，不操作
-    selectedValues[field].clear(); // 清空=全部
+    // 点"全部"→清空该字段的所有选择
+    if(selectedValues[field].size===0)return;
+    selectedValues[field].clear();
+    delete selectedValues[field]._wasSet;
   } else {
-    // 如果之前是"全部"，先清空再添加第一个值
-    if(selectedValues[field].size===0 && !selectedValues[field]._wasSet){
-      // 还没选过任何东西，就是"全部"状态
-    }
+    // 切换单个选项
     if(selectedValues[field].has(value)){
       selectedValues[field].delete(value);
     } else {
@@ -382,11 +488,13 @@ function toggleOption(field, value) {
     selectedValues[field]._wasSet=true;
   }
 
-  updateTriggerUI(field);
+  // 【关键修复】立即重新渲染该字段的选项 DOM，确保 checkbox 打勾状态同步
+  const cfg = FILTER_CONFIG.find(c => c.field === field);
+  const cfgIdx = FILTER_CONFIG.indexOf(cfg);
+  refreshDropdownOptions(cfg);
 
-  // 更新"全部"选项的状态
-  const allOpt=document.querySelector(`#dropdown-${field} [data-val="__ALL__"]`);
-  if(allOpt) allOpt.classList.toggle('selected', selectedValues[field].size===0);
+  // 【核心】级联刷新后续所有筛选器（逐步收窄）
+  refreshSubsequentDropdowns(cfgIdx + 1);
 
   applyFilters();
 }
@@ -395,7 +503,6 @@ function updateTriggerUI(field) {
   const vals=selectedValues[field];
   const triggerText=document.getElementById('trigger-'+field);
   const countEl=document.getElementById('count-'+field);
-  const trigger=document.querySelector(`[data-field="${field}"].multi-select-trigger`);
 
   if(vals.size===0){
     triggerText.textContent='全部';triggerText.classList.remove('has-value');
@@ -420,11 +527,10 @@ function getFilteredData() {
   return allData.filter(r=>{
     for(const cfg of FILTER_CONFIG){
       const sel=selectedValues[cfg.field];
-      if(sel.size===0) continue; // 空=不筛选该项
+      if(sel.size===0) continue;
       
       const cellValue=String(r[cfg.field]||'');
       
-      // 多值匹配：选中任一子项即命中
       let matched=false;
       for(const sv of sel){
         if(cellValue.includes(sv)){matched=true;break;}
@@ -451,14 +557,10 @@ function applyFilters() {
 
 function resetFilters() {
   document.getElementById('fSearch').value='';
-  FILTER_CONFIG.forEach(cfg=>{
+  FILTER_CONFIG.forEach((cfg, idx) => {
     selectedValues[cfg.field]=new Set();
-    updateTriggerUI(cfg.field);
-    // 重置"全部"高亮
-    const allOpt=document.querySelector(`#dropdown-${cfg.field} [data-val="__ALL__"]`);
-    if(allOpt) allOpt.classList.add('selected');
-    // 取消其他项高亮
-    document.querySelectorAll(`#dropdown-${cfg.field} .dropdown-opt:not([data-val="__ALL__"])`).forEach(o=>o.classList.remove('selected'));
+    delete selectedValues[cfg.field]._wasSet;
+    refreshDropdownOptions(cfg);
   });
   applyFilters();
 }
@@ -508,12 +610,17 @@ function renderBody(records){
       const af=r._all_fields||{};
       const shownKeys=new Set(TABLE_COLS.map(c=>c.key));
       const extraFields=Object.entries(af).filter(([k])=>!shownKeys.has(k));
-      const di=extraFields.map(([k,v])=>`<div class="detail-field"><span class="detail-label">${esc(k)}</span><span class="detail-value">${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</span></div>`).join('');
+
+      // 紧凑表格形式展示详情（每行一个字段名+值，左右对齐）
+      const detailRowsHtml = extraFields.map(([k,v]) =>
+        `<tr><td>${esc(k)}</td><td>${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</td></tr>`
+      ).join('');
+
       const srcBadge={'历史在投':'detail-source-history','创造营':'detail-source-camp','销售新增':'detail-source-extra'};
       const bc=srcBadge[r['达人来源']||'']||'';
       detailRow=`<tr class="detail-row show"><td colspan="${TABLE_COLS.length+1}" class="detail-cell">
         <span class="detail-source-badge ${bc}">📋 来自「${esc(r['达人来源']||'')}」完整字段 (${extraFields.length}项)</span>
-        <div class="detail-grid">${di}</div>
+        <table class="detail-table">${detailRowsHtml}</table>
         <div class="detail-actions">
           <button class="btn-copy" onclick="event.stopPropagation();copyAll(${r._id})">📋 复制全部信息</button>
           <button class="btn-copy" onclick="event.stopPropagation();copyBasic(${r._id})">📋 仅复制基础信息</button>
@@ -554,7 +661,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function copyAll(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.clipboard.writeText(Object.entries(r._all_fields||{}).map(([k,v])=>`${k}:${v}`).join('\n')).then(()=>showToast('✅已复制全部字段'));}
 function copyBasic(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.clipboard.writeText(['达人IP:'+r['达人IP'],'来源:'+r['达人来源'],'等级:'+r['等级'],'流转策略:'+r['流转策略'],'销售归属:'+r['销售归属'],'标签:'+r['达人标签'],'粉丝画像:'+r['粉丝画像'],'合作类型:'+r['合作类型'],'带货类型:'+r['带货类型'],'图书类目:'+r['图书类目倾向'],'课程类目:'+r['课程类目倾向'],'单价:'+r['带货单价'],'撮合状态:'+r['撮合状态']].join('\n')).then(()=>showToast('✅已复制基础信息'));}
 
-document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus()} if(e.key==='Escape'){closeAllDropdowns();resetFilters()}});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus()} if(e.key==='Escape'){closeAllDropdowns()}});
 init();
 </script>
 </body>
