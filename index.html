@@ -432,8 +432,9 @@ function renderBody(records) {
       if (c.isLevel) {
         return `<td>${val ? '<span class="level-tag level-'+val+'">'+esc(val)+'</span>' : '-'}</td>`;
       } else if (c.isTag && val) {
-        const tags = val.split(/[,、\/|；;/]).map(t=>t.trim()).filter(Boolean).slice(0,4);
-        return `<td>${tags.map(t=>'<span class="tag-inline">'+esc(t)+'</span>').join('')}${tags.length<val.split(/[,、\/|；;/]).length?'<span style="font-size:11px;color:var(--gray-400)">...</span>':''}</td>`;
+        const tagSplitRegex = /[,、/|；;\u3001;]/;
+        const tags = val.split(tagSplitRegex).map(t=>t.trim()).filter(Boolean).slice(0,4);
+        return `<td>${tags.map(t=>'<span class="tag-inline">'+esc(t)+'</span>').join('')}${tags.length<val.split(tagSplitRegex).length?'<span style="font-size:11px;color:var(--gray-400)">...</span>':''}</td>`;
       } else if (c.isSource) {
         const sourceColors = {'历史在投':'#DBEAFE','创造营':'#D1FAE5','销售新增':'#FEF3C7'};
         const bg = sourceColors[val] || '#F3F4F6';
