@@ -118,7 +118,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .btn-reset:hover{background:var(--gray-50);border-color:var(--gray-300);}
 
 /* ===== 表格 ===== */
-.table-wrapper{overflow-x:auto;background:white;border-radius:0 0 12px 12px;}
+.table-wrapper{
+  overflow-x:auto;background:white;border-radius:0 0 12px 12px;
+  position:relative;
+  /* 隐藏滚动条但保留功能 */
+  scrollbar-width:thin;scrollbar-color:var(--gray-300) transparent;
+}
+/* 右侧渐变遮罩 + 滑动提示 */
+.table-wrapper::after{
+  content:'← 左右滑动查看更多 →';
+  position:absolute;right:0;top:0;bottom:0;width:120px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9) 50%,white);
+  display:flex;align-items:center;justify-content:flex-end;
+  padding-right:16px;font-size:11.5px;color:var(--gray-400);
+  pointer-events:none;opacity:1;transition:opacity .4s;
+  letter-spacing:.5px;z-index:5;
+}
+/* 当用户开始横向滚动后，隐藏提示 */
+.table-wrapper.scrolled::after{opacity:0;}
+
 .talent-table{width:100%;border-collapse:collapse;min-width:1300px;}
 .talent-table thead th{
   position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#F8FAFC,var(--gray-50));
@@ -678,6 +696,15 @@ function copyAll(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.
 function copyBasic(id){const r=allData.find(x=>x._id===id);if(!r)return;navigator.clipboard.writeText(['达人IP:'+r['达人IP'],'来源:'+r['达人来源'],'等级:'+r['等级'],'流转策略:'+r['流转策略'],'销售归属:'+r['销售归属'],'标签:'+r['达人标签'],'粉丝画像:'+r['粉丝画像'],'合作类型:'+r['合作类型'],'带货类型:'+r['带货类型'],'图书类目:'+r['图书类目倾向'],'课程类目:'+r['课程类目倾向'],'单价:'+r['带货单价'],'撮合状态:'+r['撮合状态']].join('\n')).then(()=>showToast('✅已复制基础信息'));}
 
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus()} if(e.key==='Escape'){closeAllDropdowns()}});
+
+// 表格横向滚动后隐藏"滑动提示"
+const tableWrapper = document.querySelector('.table-wrapper');
+if(tableWrapper){
+  tableWrapper.addEventListener('scroll',()=>{
+    if(tableWrapper.scrollLeft > 20) tableWrapper.classList.add('scrolled');
+    else tableWrapper.classList.remove('scrolled');
+  });
+}
 init();
 </script>
 </body>
