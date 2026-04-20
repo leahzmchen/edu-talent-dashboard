@@ -16,7 +16,23 @@ import os
 from datetime import datetime
 
 # === 配置 ===
-INPUT_FILE = '/Users/leahchen/Desktop/达人看板搭建/双轨合并本地版.xlsx'
+import glob as _glob, os as _os
+
+# 自动查找目录下的 Excel 文件（支持任意文件名）
+_EXCEL_DIR = '/Users/leahchen/Desktop/达人看板搭建/'
+_all_xls = sorted(_glob.glob(_EXCEL_DIR + '*.xlsx')) + sorted(_glob.glob(_EXCEL_DIR + '*.xls'))
+# 排除临时文件(~$开头)和备份文件
+_excel_files = [f for f in _all_xls if not _os.path.basename(f).startswith('~$')]
+if not _excel_files:
+    raise FileNotFoundError(f'❌ 在 {_EXCEL_DIR} 下没有找到 Excel 文件，请先放入数据源文件')
+
+# 优先选择包含"合并"或"月度"的文件（通常是主数据源），否则取第一个
+_priority = [f for f in _excel_files if any(k in _os.path.basename(f) for k in ['合并', '月度'])]
+INPUT_FILE = _priority[0] if _priority else _excel_files[0]
+
+if len(_excel_files) > 1:
+    print(f'📂 目录下文件: {[_os.path.basename(f) for f in _excel_files]}')
+print(f'✅ 使用数据源: {_os.path.basename(INPUT_FILE)}')
 OUTPUT_DIR = '/Users/leahchen/WorkBuddy/20260420173826/data'
 
 # 共同字段（15个）- 用于浅层展示和筛选
