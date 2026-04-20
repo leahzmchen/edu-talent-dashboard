@@ -307,15 +307,31 @@ async function init() {
   }
 }
 
+// 需要拆分为独立选项的多值字段
+const MULTI_VALUE_FIELDS = ['合作类型','带货类型','达人标签','图书类目倾向','课程类目倾向'];
+
 function buildFilterOptions(data) {
-  const extractUnique = (field) => [...new Set((data||[]).map(r => r[field]).filter(Boolean))].sort();
+  // 单值字段：直接取唯一值
+  const extractUnique = (field) =>
+    [...new Set((data||[]).map(r => r[field]).filter(Boolean))].sort();
+
+  // 多值字段：先拆分每个单元格的复合值，再取去重后的独立选项
+  const extractSplitUnique = (field) => {
+    const tagSplitRegex = /[,、/|；;\u3001;]/;
+    const allValues = new Set();
+    (data||[]).forEach(r => {
+      const val = r[field];
+      if (val) val.split(tagSplitRegex).forEach(v => { v=v.trim(); if(v) allValues.add(v); });
+    });
+    return [...allValues].sort();
+  };
 
   rebuildSelect('fSource', extractUnique('达人来源'));
   rebuildSelect('fLevel', extractUnique('等级'));
   rebuildSelect('fStrategy', extractUnique('流转策略'));
-  rebuildSelect('fTags', extractUnique('达人标签'));
-  rebuildSelect('fCoopType', extractUnique('合作类型'));
-  rebuildSelect('fSaleType', extractUnique('带货类型'));
+  rebuildSelect('fTags', extractSplitUnique('达人标签'));
+  rebuildSelect('fCoopType', extractSplitUnique('合作类型'));
+  rebuildSelect('fSaleType', extractSplitUnique('带货类型'));
   rebuildSelect('fMatchStatus', extractUnique('撮合状态'));
 }
 
@@ -347,8 +363,8 @@ function getFilteredData() {
     if (level && r['等级'] !== level) return false;
     if (strategy && !String(r['流转策略']||'').includes(strategy)) return false;
     if (tags && !String(r['达人标签']||'').includes(tags)) return false;
-    if (coopType && r['合作类型'] !== coopType) return false;
-    if (saleType && r['带货类型'] !== saleType) return false;
+    if (coopType && !String(r['合作类型']||'').includes(coopType)) return false;
+    if (saleType && !String(r['带货类型']||'').includes(saleType)) return false;
     if (matchStatus && !String(r['撮合状态']||'').includes(matchStatus)) return false;
     if (q) {
       const searchFields = ['达人IP','视频号账号','达人标签','粉丝画像','销售归属','达人来源','撮合客户'];
