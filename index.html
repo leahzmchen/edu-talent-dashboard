@@ -41,20 +41,6 @@ body {
 
 .main{max-width:1440px;margin:0 auto;padding:24px;}
 
-/* ===== Tab 切换 ===== */
-.tab-bar{
-  display:flex;background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);
-  padding:4px;margin-bottom:20px;overflow-x:auto;
-}
-.tab-btn{
-  flex:1;padding:14px 20px;font-size:15px;font-weight:600;color:var(--gray-500);
-  border:none;background:transparent;border-radius:10px;cursor:pointer;
-  transition:all .25s;white-space:nowrap;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.tab-btn:hover{color:var(--gray-700);background:var(--gray-50);}
-.tab-btn.active{color:var(--primary);background:var(--primary-bg);box-shadow:0 2px 8px rgba(79,70,229,.15);}
-.tab-btn .tab-count{font-size:11px;background:rgba(79,70,229,.12);color:var(--primary-dark);padding:2px 8px;border-radius:10px;font-weight:700;}
-
 /* ===== 筛选区域 ===== */
 .filter-section{
   background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);
@@ -86,50 +72,72 @@ body {
 
 /* ===== 表格 ===== */
 .table-wrapper{overflow-x:auto;background:white;border-radius:0 0 12px 12px;}
-.talent-table{width:100%;border-collapse:collapse;min-width:1100px;}
+.talent-table{width:100%;border-collapse:collapse;min-width:1300px;}
 .talent-table thead th{
   position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#F8FAFC,var(--gray-50));
-  padding:12px 14px;font-size:12px;font-weight:600;color:var(--gray-500);
+  padding:11px 14px;font-size:12px;font-weight:600;color:var(--gray-500);
   text-align:left;border-bottom:2px solid var(--gray-200);white-space:nowrap;
   user-select:none;
 }
 .talent-table thead th.sortable{cursor:pointer;transition:color .2s;}
 .talent-table thead th.sortable:hover{color:var(--primary);}
-.talent-table thead th.sorted-asc::after{content:' ↑';color:var(--primary);}
-.talent-table thead th.sorted-desc::after{content:' ↓';color:var(--primary);}
+.talent-table thead th.sorted-asc::after{content:' \u2191';color:var(--primary);}
+.talent-table thead th.sorted-desc::after{content:' \u2193';color:var(--primary);}
 
 .talent-table tbody td{
-  padding:12px 14px;font-size:13px;border-bottom:1px solid var(--gray-100);
+  padding:10px 14px;font-size:13px;border-bottom:1px solid var(--gray-100);
   color:var(--gray-700);vertical-align:middle;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.talent-table tbody tr{transition:background .15s;cursor:pointer;}
+.talent-table tbody tr{transition:background .15s;}
 .talent-table tbody tr:hover{background:#EEF2FF;}
 .talent-table tbody tr.expanded{background:#EDE9FE;}
 .talent-table tbody tr.expanded:hover{background:#DDD6FE;}
 
 /* 表格内标签 */
 .level-tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;}
-.level-A{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#1a1a1a;}
+.level-A{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#1a1a2e;}
 .level-B{background:linear-gradient(135deg,#3B82F6,#2563eb);color:white;}
 .level-C{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}
 .level-D{background:linear-gradient(135deg,#94a3b8,#64748b);color:white;}
 .level-E{background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:white;}
 
 .tag-inline{display:inline-block;padding:1px 8px;background:#EEF2FF;color:#4338CA;border-radius:4px;font-size:11.5px;margin:1px 3px 1px 0;white-space:normal;word-break:break-all;}
-.status-tag{padding:2px 8px;border-radius:6px;font-size:11.5px;font-weight:600;}
 
-/* ===== 详情面板 ===== */
-.detail-row{display:none;background:#FBFBFE;}
+/* 更多详情按钮 */
+.btn-detail{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 12px;font-size:11.5px;font-weight:600;border-radius:6px;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  border:1px solid rgba(79,70,229,.25);background:var(--primary-bg);color:var(--primary);
+}
+.btn-detail:hover{background:#DEDFFE;transform:translateY(-1px);box-shadow:0 3px 8px rgba(79,70,229,.15);}
+.btn-detail.expanded{background:var(--primary);color:white;border-color:var(--primary);}
+
+/* 来源标签 */
+.source-tag{
+  display:inline-block;padding:2px 10px;border-radius:4px;font-size:11.5px;font-weight:500;
+}
+
+/* ===== 详情面板（展开行） ===== */
+.detail-row{display:none;background:linear-gradient(135deg,#FBFAFE,#F5F3FF);}
 .detail-row.show{display:table-row;}
-.detail-cell{padding:16px 24px!important;max-width:none!important;vertical-align:top!important;white-space:normal!important;overflow:visible!important;}
+.detail-cell{padding:16px 24px!important;vertical-align:top!important;white-space:normal!important;overflow:visible!important;}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px 28px;}
 .detail-field{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px dashed rgba(148,163,184,.2);}
 .detail-label{color:var(--gray-500);font-size:12.5px;white-space:nowrap;flex-shrink:0;margin-right:10px;min-width:90px;}
 .detail-value{color:var(--gray-800);font-size:12.5px;text-align:right;word-break:break-all;font-weight:500;}
 
+/* 详情来源标签（区分sheet） */
+.detail-source-badge{
+  display:inline-block;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:600;margin-bottom:10px;
+}
+.detail-source-history{background:#DBEAFE;color:#1E40AF;}
+.detail-source-camp{background:#D1FAE5;color:#065F46;}
+.detail-source-extra{background:#FEF3C7;color:#92400E;}
+
 .detail-actions{
   display:flex;align-items:center;justify-content:end;gap:10px;
-  padding:12px 24px 0;border-top:1px solid var(--gray-100);margin-top:8px;
+  padding:12px 24px 0;border-top:1px solid var(--gray-200);margin-top:8px;
 }
 .btn-copy{
   padding:7px 16px;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;
@@ -158,20 +166,15 @@ body {
 
 /* ===== 响应式 ===== */
 @media(max-width:768px){
-  .header{padding:18px 16px;}
-  .header h1{font-size:20px;}
+  .header{padding:18px 16px;} .header h1{font-size:20px;}
   .main{padding:16px;}
   .talent-filters{padding:12px 16px;gap:8px;}
   .filter-group{min-width:100px;}
   .filter-group select,.filter-group input{min-width:100px;font-size:12px;padding:6px 10px;height:34px;}
-  .header-stats{gap:12px;}
-  .stat-item{padding:8px 12px;}
-  .stat-item .num{font-size:20px;}
-  .tab-btn{padding:10px 14px;font-size:13px;}
+  .header-stats{gap:12px;} .stat-item{padding:8px 12px;} .stat-item .num{font-size:20px;}
   .detail-grid{grid-template-columns:1fr;}
 }
 
-/* 滚动条 */
 ::-webkit-scrollbar{width:6px;height:6px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:3px;}
@@ -183,29 +186,17 @@ body {
 <!-- Header -->
 <header class="header">
   <h1>📊 达人看板 <span style="font-size:14px;font-weight:400;opacity:.75;">· 内部自用</span></h1>
-  <p class="header-summary">历史沉淀 + 创造营建联 · 双轨数据 · 根据需求筛选匹配达人</p>
+  <p class="header-summary">历史沉淀 + 创造营建联 + 销售新增 · 合并展示 · 根据需求筛选匹配达人</p>
   <div class="header-stats" id="headerStats"></div>
 </header>
 
 <main class="main">
 
-<!-- Tab 切换 -->
-<div class="tab-bar" id="tabBar">
-  <button class="tab-btn active" data-tab="history" onclick="switchTab('history')">
-    📚 历史沉淀 <span class="tab-count" id="countHistory">0</span>
-  </button>
-  <button class="tab-btn" data-tab="camp" onclick="switchTab('camp')">
-    🚀 创造营建联 <span class="tab-count" id="countCamp">0</span>
-  </button>
-  <button class="tab-btn" data-tab="extra" onclick="switchTab('extra')">
-    ➕ 销售新增 <span class="tab-count" id="countExtra">0</span>
-  </button>
-</div>
-
 <!-- 筛选 + 表格 -->
 <div class="filter-section">
   <!-- 筛选器 -->
   <div class="talent-filters">
+    <div class="filter-group"><label>达人来源</label><select id="fSource"><option value="">全部</option></select></div>
     <div class="filter-group"><label>等级</label><select id="fLevel"><option value="">全部</option></select></div>
     <div class="filter-group"><label>流转策略</label><select id="fStrategy"><option value="">全部</option></select></div>
     <div class="filter-group"><label>达人标签</label><select id="fTags"><option value="">全部</option></select></div>
@@ -249,27 +240,26 @@ body {
 // ============================================================
 // 全局数据与配置
 // ============================================================
-const DATA = {};
-let currentTab = 'history';
+
+let allData = [];       // 所有数据合并
 let expandedId = null;
 
-// 表格列定义：15个共同字段
+// 表格列定义：13个展示字段 + 操作列
 const TABLE_COLS = [
-  { key: '达人IP',       label: '达人IP',     width: '', sortable: true },
-  { key: '等级',         label: '等级',       width: '80px',   isLevel: true },
-  { key: '流转策略',     label: '流转策略',   width: '100px' },
-  { key: '销售归属',     label: '销售归属',   width: '140px' },
-  { key: '视频号账号',   label: '视频号账号', width: '200px' },
-  { key: '达人标签',     label: '达人标签',   width: '180px',  isTag: true },
-  { key: '粉丝画像',     label: '粉丝画像',   width: '120px' },
-  { key: '合作类型',     label: '合作类型',   width: '100px' },
-  { key: '带货类型',     label: '带货类型',   width: '100px' },
-  { key: '图书类目倾向', label: '图书类目',   width: '100px' },
-  { key: '课程类目倾向', label: '课程类目',   width: '100px' },
-  { key: '带货单价',     label: '单价',       width: '80px' },
-  { key: '撮合状态',     label: '撮合状态',   width: '100px' },
-  { key: '撮合客户',     label: '撮合客户',   width: '120px' },
-  { key: '达人来源',     label: '来源',       width: '90px',  isSource: true },
+  { key: '达人来源',     label: '来源',       width: '85px',   isSource: true },
+  { key: '达人IP',       label: '达人IP',     width: '',       sortable: true },
+  { key: '等级',         label: '等级',       width: '65px',   isLevel: true },
+  { key: '流转策略',     label: '流转策略',   width: '95px' },
+  { key: '销售归属',     label: '销售归属',   width: '130px' },
+  { key: '达人标签',     label: '达人标签',   width: '170px',  isTag: true },
+  { key: '粉丝画像',     label: '粉丝画像',   width: '110px' },
+  { key: '合作类型',     label: '合作类型',   width: '95px' },
+  { key: '带货类型',     label: '带货类型',   width: '95px' },
+  { key: '图书类目倾向', label: '图书类目',   width: '90px' },
+  { key: '课程类目倾向', label: '课程类目',   width: '90px' },
+  { key: '带货单价',     label: '单价',       width: '75px' },
+  { key: '撮合状态',     label: '撮合状态',   width: '90px' },
+  // 最后一列：操作
 ];
 
 // ============================================================
@@ -282,29 +272,29 @@ async function init() {
       fetch('./data/data_camp.json').then(r=>r.json()).catch(()=>({data:[],options:{}})),
       fetch('./data/data_extra.json').then(r=>r.json()).catch(()=>({data:[],options:{}}))
     ]);
-    DATA.history = h; DATA.camp = c; DATA.extra = e;
 
-    // 更新头部统计
+    // 合并所有数据为一个大数组
+    allData = [...h.data, ...c.data, ...e.data];
+
+    // 统计
+    const sourceCount = {};
+    allData.forEach(r => { sourceCount[r['达人来源']] = (sourceCount[r['达人来源']]||0) + 1; });
+
     document.getElementById('headerStats').innerHTML =
-      `<div class="stat-item"><span class="num">${h.data.length}</span><span class="label">历史沉淀</span></div>` +
-      `<div class="stat-item"><span class="num">${c.data.length}</span><span class="label">创造营</span></div>` +
-      `<div class="stat-item"><span class="num">${e.data.length}</span><span class="label">销售新增</span></div>` +
-      `<div class="stat-item"><span class="num">${h.data.length+c.data.length+e.data.length}</span><span class="label">总计达人</span></div>`;
-    
-    // 更新 tab 计数
-    document.getElementById('countHistory').textContent = h.data.length + '人';
-    document.getElementById('countCamp').textContent = c.data.length + '人';
-    document.getElementById('countExtra').textContent = e.data.length + '人';
+      `<div class="stat-item"><span class="num">${allData.length}</span><span class="label">总计达人</span></div>` +
+      Object.entries(sourceCount).map(([k,v]) =>
+        `<div class="stat-item"><span class="num">${v}</span><span class="label">${k}</span></div>`
+      ).join('');
 
-    // 渲染表头
+    // 构建筛选选项（从合并数据中提取）
+    buildFilterOptions(allData);
+
+    // 渲染表头和表格
     renderHead();
-
-    // 构建筛选选项并渲染
-    buildFilterOptions();
     applyFilters();
 
-    // 绑定筛选事件
-    ['fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
+    // 绑定事件
+    ['fSource','fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
       document.getElementById(id).addEventListener('change', () => applyFilters());
     });
 
@@ -317,49 +307,33 @@ async function init() {
   }
 }
 
-// ============================================================
-// Tab 切换
-// ============================================================
-function switchTab(tab) {
-  currentTab = tab;
-  expandedId = null;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  buildFilterOptions();
-  applyFilters();
-}
+function buildFilterOptions(data) {
+  const extractUnique = (field) => [...new Set((data||[]).map(r => r[field]).filter(Boolean))].sort();
 
-function buildFilterOptions() {
-  const src = DATA[currentTab];
-  if (!src?.options) return;
-  const opts = src.options;
-
-  rebuildSelect('fLevel', opts['等级']||[]);
-  rebuildSelect('fStrategy', opts['流转策略']||[]);
-  rebuildSelect('fTags', opts['达人标签']||[]);
-  rebuildSelect('fCoopType', opts['合作类型']||[]);
-  rebuildSelect('fSaleType', opts['带货类型']||[]);
-  rebuildSelect('fMatchStatus', opts['撮合状态']||[]);
+  rebuildSelect('fSource', extractUnique('达人来源'));
+  rebuildSelect('fLevel', extractUnique('等级'));
+  rebuildSelect('fStrategy', extractUnique('流转策略'));
+  rebuildSelect('fTags', extractUnique('达人标签'));
+  rebuildSelect('fCoopType', extractUnique('合作类型'));
+  rebuildSelect('fSaleType', extractUnique('带货类型'));
+  rebuildSelect('fMatchStatus', extractUnique('撮合状态'));
 }
 
 function rebuildSelect(id, options) {
   const el = document.getElementById(id);
-  const cur = el.value;
   el.innerHTML = '<option value="">全部</option>';
-  (options || []).sort().forEach(v => {
+  (options || []).forEach(v => {
     const o = document.createElement('option');
     o.value = v; o.textContent = v;
     el.appendChild(o);
   });
-  // 尝试保留之前的选择
-  if (cur && options.includes(cur)) el.value = cur;
 }
 
 // ============================================================
 // 筛选逻辑
 // ============================================================
 function getFilteredData() {
-  let records = DATA[currentTab]?.data || [];
-  
+  const fSource = document.getElementById('fSource').value;
   const level = document.getElementById('fLevel').value;
   const strategy = document.getElementById('fStrategy').value;
   const tags = document.getElementById('fTags').value;
@@ -368,7 +342,8 @@ function getFilteredData() {
   const matchStatus = document.getElementById('fMatchStatus').value;
   const q = (document.getElementById('fSearch').value || '').trim().toLowerCase();
 
-  return records.filter(r => {
+  return allData.filter(r => {
+    if (fSource && r['达人来源'] !== fSource) return false;
     if (level && r['等级'] !== level) return false;
     if (strategy && !String(r['流转策略']||'').includes(strategy)) return false;
     if (tags && !String(r['达人标签']||'').includes(tags)) return false;
@@ -386,16 +361,15 @@ function getFilteredData() {
 
 function applyFilters() {
   const filtered = getFilteredData();
-  const total = DATA[currentTab]?.data?.length || 0;
   renderBody(filtered);
   document.getElementById('resultInfo').textContent =
-    filtered.length !== total ? `筛选结果：${filtered.length} / ${total}` : `共 ${total} 条`;
+    filtered.length !== allData.length ? `筛选结果：${filtered.length} / ${allData.length}` : `共 ${allData.length} 条`;
   document.getElementById('emptyState').style.display = filtered.length ? 'none' : '';
 }
 
 function resetFilters() {
   document.getElementById('fSearch').value = '';
-  ['fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
+  ['fSource','fLevel','fStrategy','fTags','fCoopType','fSaleType','fMatchStatus'].forEach(id => {
     document.getElementById(id).value = '';
   });
   applyFilters();
@@ -405,11 +379,12 @@ function resetFilters() {
 // 渲染表格
 // ============================================================
 function renderHead() {
-  document.getElementById('tableHead').innerHTML = TABLE_COLS.map(c =>
-    `<th class="${c.sortable ? 'sortable' : ''}" ${c.width ? 'style="width:'+c.width+'"' : ''} data-col="${c.key}">${esc(c.label)}</th>`
+  let html = TABLE_COLS.map(c =>
+    `<th class="${c.sortable?'sortable':''}" ${c.width?'style="width:'+c.width+'"':''} data-col="${c.key}">${esc(c.label)}</th>`
   ).join('');
+  html += '<th style="width:90px;text-align:center;">更多详情</th>'; // 操作列
+  document.getElementById('tableHead').innerHTML = html;
 
-  // 排序点击
   document.querySelectorAll('#tableHead th.sortable').forEach(th => {
     th.onclick = () => sortBy(th.dataset.col);
   });
@@ -422,60 +397,79 @@ function renderBody(records) {
     return;
   }
 
-  tbody.innerHTML = records.map((r, idx) => {
-    const isExpanded = expandedId === r._id;
-    const trClass = isExpanded ? 'expanded' : '';
+  const tagSplitRegex = /[,、/|；;\u3001;]/;
 
-    // 数据行
+  tbody.innerHTML = records.map(r => {
+    const isExpanded = expandedId === r._id;
+
+    // 数据单元格
     let cells = TABLE_COLS.map(c => {
       let val = r[c.key] || '';
       if (c.isLevel) {
         return `<td>${val ? '<span class="level-tag level-'+val+'">'+esc(val)+'</span>' : '-'}</td>`;
       } else if (c.isTag && val) {
-        const tagSplitRegex = /[,、/|；;\u3001;]/;
         const tags = val.split(tagSplitRegex).map(t=>t.trim()).filter(Boolean).slice(0,4);
         return `<td>${tags.map(t=>'<span class="tag-inline">'+esc(t)+'</span>').join('')}${tags.length<val.split(tagSplitRegex).length?'<span style="font-size:11px;color:var(--gray-400)">...</span>':''}</td>`;
       } else if (c.isSource) {
-        const sourceColors = {'历史在投':'#DBEAFE','创造营':'#D1FAE5','销售新增':'#FEF3C7'};
-        const bg = sourceColors[val] || '#F3F4F6';
-        return `<td><span style="display:inline-block;padding:2px 10px;border-radius:4px;font-size:11.5px;font-weight:500;background:${bg};color:var(--gray-700)">${esc(val)}</span></td>`;
+        const colors = {'历史在投':'#DBEAFE;color:#1E40AF','创造营':'#D1FAE5;color:#065F46','销售新增':'#FEF3C7;color:#92400E'};
+        const sc = colors[val] || '#F3F4F6;color:var(--gray-700)';
+        return `<td><span class="source-tag" style="background:${sc}">${esc(val)}</span></td>`;
       } else {
         return `<td title="${esc(val)}">${esc(val)||'-'}</td>`;
       }
     }).join('');
 
-    // 详情行（展开时显示）
+    // 更多详情按钮列
+    cells += `<td style="text-align:center;">
+      <button class="btn-detail ${isExpanded?'expanded':''}" onclick="event.stopPropagation();toggleExpand(${r._id})">
+        ${isExpanded?'▲ 收起详情':'▼ 更多详情'}
+      </button>
+    </td>`;
+
+    // 展开的详情行
     let detailRow = '';
     if (isExpanded) {
       const allFields = r._all_fields || {};
-      const detailItems = Object.entries(allFields)
-        .map(([k,v]) => `<div class="detail-field"><span class="detail-label">${esc(k)}</span><span class="detail-value">${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</span></div>`)
-        .join('');
-      
-      detailRow = `<tr class="detail-row show"><td colspan="${TABLE_COLS.length}" class="detail-cell">
+      // 排除已展示的浅层字段，只显示额外字段
+      const shownKeys = new Set(TABLE_COLS.map(c => c.key));
+      const extraFields = Object.entries(allFields).filter(([k]) => !shownKeys.has(k));
+
+      const detailItems = extraFields.map(([k,v]) =>
+        `<div class="detail-field"><span class="detail-label">${esc(k)}</span><span class="detail-value">${v!==''&&v!==null&&v!==undefined?esc(String(v)):'<em style="color:var(--gray-400)">空</em>'}</span></div>`
+      ).join('');
+
+      const srcBadgeClass = {
+        '历史在投': 'detail-source-history',
+        '创造营': 'detail-source-camp',
+        '销售新增': 'detail-source-extra'
+      };
+      const srcLabel = r['达人来源'] || '';
+      const badgeCls = srcBadgeClass[srcLabel] || '';
+
+      detailRow = `<tr class="detail-row show"><td colspan="${TABLE_COLS.length+1}" class="detail-cell">
+        <span class="detail-source-badge ${badgeCls}">📋 来自「${esc(srcLabel)}」完整字段 (${extraFields.length}项)</span>
         <div class="detail-grid">${detailItems}</div>
         <div class="detail-actions">
           <button class="btn-copy" onclick="event.stopPropagation();copyAll(${r._id})">📋 复制全部信息</button>
-          <button class="btn-copy" onclick="event.stopPropagation();copyIP(${r._id})">📋 仅复制达人信息</button>
+          <button class="btn-copy" onclick="event.stopPropagation();copyBasic(${r._id})">📋 仅复制基础信息</button>
         </div>
       </td></tr>`;
     }
 
-    return `<tr class="${trClass}" onclick="toggleExpand(${r._id})">${cells}</tr>${detailRow}`;
+    return `<tr class="${isExpanded?'expanded':''}">${cells}</tr>${detailRow}`;
   }).join('');
 }
 
 // ============================================================
-// 展开详情
+// 展开/收起详情
 // ============================================================
 function toggleExpand(id) {
   expandedId = expandedId === id ? null : id;
-  applyFilters(); // 重新渲染以更新展开状态
+  applyFilters();
   
-  // 滚动到展开的行
   if (expandedId) {
     setTimeout(() => {
-      const row = document.querySelector(`tr.expanded`);
+      const row = document.querySelector('tr.expanded');
       if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 50);
   }
@@ -490,28 +484,23 @@ function sortBy(colKey) {
   if (sortCol === colKey) {
     sortDir = sortDir === 'asc' ? 'desc' : 'asc';
   } else {
-    sortCol = colKey;
-    sortDir = 'asc';
+    sortCol = colKey; sortDir = 'asc';
   }
-  
-  // 更新表头样式
+
   document.querySelectorAll('#tableHead th').forEach(th => {
     th.classList.remove('sorted-asc', 'sorted-desc');
-    if (th.dataset.col === sortCol) {
-      th.classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    }
+    if (th.dataset.col === sortCol) th.classList.add(sortDir==='asc'?'sorted-asc':'sorted-desc');
   });
 
   const records = getFilteredData();
   records.sort((a,b) => {
-    const va = a[sortCol] || ''; const vb = b[sortCol] || '';
-    const cmp = String(va).localeCompare(String(vb), 'zh-CN', {numeric:true});
-    return sortDir === 'asc' ? cmp : -cmp;
+    const va = a[sortCol]||''; const vb = b[sortCol]||'';
+    return String(va).localeCompare(String(vb), 'zh-CN', {numeric:true}) * (sortDir==='asc'?1:-1);
   });
-  // 直接用排序后的结果渲染
-  const total = DATA[currentTab]?.data?.length || 0;
+  
+  const total = allData.length;
   renderBody(records);
-  document.getElementById('resultInfo').textContent = 
+  document.getElementById('resultInfo').textContent =
     `筛选结果：${records.length} / ${total} · 按 ${TABLE_COLS.find(c=>c.key===sortCol)?.label||sortCol} ${sortDir==='asc'?'↑升序':'↓降序'}`;
 }
 
@@ -519,52 +508,40 @@ function sortBy(colKey) {
 // 工具函数
 // ============================================================
 function esc(s) {
-  if (s === null || s === undefined) return '';
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML.replace(/"/g,'&quot;');
+  if (s===null||s===undefined) return '';
+  const d=document.createElement('div'); d.textContent=s; return d.innerHTML.replace(/"/g,'&quot;');
 }
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg || '✅ 已复制到剪贴板';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1500);
+  const t=document.getElementById('toast'); t.textContent=msg||'✅ 已复制到剪贴板';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500);
 }
 
 function copyAll(id) {
-  const r = DATA[currentTab]?.data.find(x => x._id === id);
-  if (!r) return;
-  const lines = Object.entries(r._all_fields || {})
-    .map(([k,v]) => `${k}: ${v}`)
-    .join('\n');
-  navigator.clipboard.writeText(lines).then(() => showToast('✅ 已复制全部字段'));
+  const r=allData.find(x=>x._id===id); if(!r)return;
+  const lines=Object.entries(r._all_fields||{}).map(([k,v])=>`${k}: ${v}`).join('\n');
+  navigator.clipboard.writeText(lines).then(()=>showToast('✅ 已复制全部字段'));
 }
 
-function copyIP(id) {
-  const r = DATA[currentTab]?.data.find(x => x._id === id);
-  if (!r) return;
-  const lines = [
-    `达人IP: ${r['达人IP']}`,
-    `来源: ${r['达人来源']}`,
-    `等级: ${r['等级']}`,
-    `销售归属: ${r['销售归属']}`,
-    `视频号: ${r['视频号账号']}`,
-    `标签: ${r['达人标签']}`,
-    `合作类型: ${r['合作类型']}`,
-    `单价: ${r['带货单价']}`,
-    `状态: ${r['撮合状态']}`
+function copyBasic(id) {
+  const r=allData.find(x=>x._id===id); if(!r)return;
+  const lines=[
+    `达人IP: ${r['达人IP']}`,`来源: ${r['达人来源']}`,`等级: ${r['等级']}`,
+    `流转策略: ${r['流转策略']}`,`销售归属: ${r['销售归属']}`,
+    `标签: ${r['达人标签']}`,`粉丝画像: ${r['粉丝画像']}`,
+    `合作类型: ${r['合作类型']}`,`带货类型: ${r['带货类型']}`,
+    `图书类目: ${r['图书类目倾向']}`,`课程类目: ${r['课程类目倾向']}`,
+    `单价: ${r['带货单价']}`,`撮合状态: ${r['撮合状态']}`
   ].join('\n');
-  navigator.clipboard.writeText(lines).then(() => showToast('✅ 已复制达人信息'));
+  navigator.clipboard.writeText(lines).then(()=>showToast('✅ 已复制基础信息'));
 }
 
 // 快捷键
 document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); document.getElementById('fSearch').focus(); }
-  if (e.key === 'Escape') resetFilters();
+  if ((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('fSearch').focus();}
+  if (e.key==='Escape') resetFilters();
 });
 
-// 启动
 init();
 </script>
 </body>
